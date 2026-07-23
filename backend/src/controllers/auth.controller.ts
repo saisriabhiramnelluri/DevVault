@@ -50,6 +50,10 @@ export async function login(req: Request, res: Response): Promise<void> {
       res.status(423).json({ error: 'ACCOUNT_LOCKED', message: 'Account is locked due to too many failed attempts. Contact support.' });
       return;
     }
+    if (err.message === 'USE_GOOGLE_LOGIN') {
+      res.status(400).json({ error: 'USE_GOOGLE_LOGIN', message: 'This account was created using Google OAuth. Please sign in with Google.' });
+      return;
+    }
     res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'Invalid email or password' });
   }
 }
@@ -155,3 +159,97 @@ export async function revokeSession(req: AuthRequest, res: Response): Promise<vo
     res.status(404).json({ error: 'SESSION_NOT_FOUND' });
   }
 }
+
+import * as googleService from '../services/google.service';
+
+export async function googleLogin(req: Request, res: Response): Promise<void> {
+  try {
+    const { code, redirectUri } = req.body;
+    const googleUser = await googleService.exchangeCodeForGoogleUser(code, redirectUri);
+    const result = await authService.handleGoogleLogin(
+      googleUser.sub,
+      googleUser.email,
+      getIpAddress(req),
+      getDeviceInfo(req)
+    );
+    res.json({
+      message: 'Google login successful',
+      token: result.token,
+      expiresAt: result.expiresAt,
+      user: result.user,
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Google login controller error:', err);
+    res.status(401).json({ error: 'GOOGLE_AUTH_FAILED', message: 'Google authentication failed' });
+  }
+}
+
+export async function setupVault(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const userId = req.userId!;
+    await authService.setupVaultData(userId, req.body);
+    res.json({ message: 'Vault security setup completed successfully' });
+  } catch (error: unknown) {
+    console.error('Setup vault error:', error);
+    res.status(500).json({ error: 'SERVER_ERROR', message: 'Failed to complete vault setup' });
+  }
+}
+
+export async function getVaultDetails(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const userId = req.userId!;
+    const details = await authService.getVaultDetails(userId);
+    res.json(details);
+  } catch (error: unknown) {
+    res.status(404).json({ error: 'NOT_FOUND', message: 'Vault details not found' });
+  }
+}
+
+export async function getRecoveryData(req: Request, res: Response): Promise<void> {
+  try {
+    const email = String(req.query.email || '');
+    if (!email) {
+      res.status(400).json({ error: 'INVALID_EMAIL', message: 'Email query parameter required' });
+      return;
+    }
+    const data = await authService.getRecoveryData(email);
+    res.json(data);
+  } catch (error: unknown) {
+    const err = error as Error;
+    if (err.message === 'RECOVERY_NOT_AVAILABLE') {
+      res.status(404).json({ error: 'RECOVERY_NOT_AVAILABLE', message: 'No recovery key set up for this email.' });
+      return;
+    }
+    res.status(500).json({ error: 'SERVER_ERROR', message: 'Failed to fetch recovery details' });
+  }
+}
+
+export async function recoverVault(req: Request, res: Response): Promise<void> {
+  try {
+    const {
+      email,
+      passwordHash,
+      encryptedMasterKey,
+      masterKeyIv,
+      newRecoveryEncryptedMasterKey,
+      newRecoveryMasterKeyIv,
+      newRecoverySalt,
+    } = req.body;
+
+    await authService.recoverVaultData(email, {
+      passwordHash,
+      encryptedMasterKey,
+      masterKeyIv,
+      newRecoveryEncryptedMasterKey,
+      newRecoveryMasterKeyIv,
+      newRecoverySalt,
+    });
+
+    res.json({ message: 'Vault recovered successfully. You can now log in with your new vault password.' });
+  } catch (error: unknown) {
+    console.error('Recover vault error:', error);
+    res.status(500).json({ error: 'SERVER_ERROR', message: 'Vault recovery failed' });
+  }
+}
+

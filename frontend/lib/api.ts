@@ -57,10 +57,68 @@ export const authApi = {
       body: JSON.stringify({ email, password }),
     }),
 
+  googleLogin: (code: string, redirectUri: string) =>
+    request<{
+      token: string;
+      expiresAt: string;
+      user: { id: string; email: string; pbkdf2Salt: string; hasVaultPassword: boolean; hasMasterKey: boolean };
+    }>('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ code, redirectUri }),
+    }),
+
   verifyOTP: (userId: string, code: string) =>
     request<{ token: string; expiresAt: string; message: string }>('/api/auth/verify-otp', {
       method: 'POST',
       body: JSON.stringify({ userId, code }),
+    }),
+
+  setupVault: (data: {
+    passwordHash?: string;
+    encryptedMasterKey: string;
+    masterKeyIv: string;
+    recoveryEncryptedMasterKey: string;
+    recoveryMasterKeyIv: string;
+    recoverySalt: string;
+  }) =>
+    request<{ message: string }>('/api/auth/vault/setup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getVaultDetails: () =>
+    request<{
+      pbkdf2Salt: string;
+      encryptedMasterKey: string | null;
+      masterKeyIv: string | null;
+      recoveryEncryptedMasterKey: string | null;
+      recoveryMasterKeyIv: string | null;
+      recoverySalt: string | null;
+      hasMasterKey: boolean;
+      hasPassword: boolean;
+    }>('/api/auth/vault/details'),
+
+  getRecoveryData: (email: string) =>
+    request<{
+      email: string;
+      pbkdf2Salt: string;
+      recoveryEncryptedMasterKey: string;
+      recoveryMasterKeyIv: string;
+      recoverySalt: string;
+    }>(`/api/auth/vault/recovery-data?email=${encodeURIComponent(email)}`),
+
+  recoverVault: (data: {
+    email: string;
+    passwordHash: string;
+    encryptedMasterKey: string;
+    masterKeyIv: string;
+    newRecoveryEncryptedMasterKey: string;
+    newRecoveryMasterKeyIv: string;
+    newRecoverySalt: string;
+  }) =>
+    request<{ message: string }>('/api/auth/vault/recover', {
+      method: 'POST',
+      body: JSON.stringify(data),
     }),
 
   logout: () =>

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authApi } from '@/lib/api';
-import { deriveKey } from '@/lib/crypto';
+import { deriveKey, unwrapMasterKey } from '@/lib/crypto';
 
 interface User {
   id: string;
@@ -18,6 +18,8 @@ interface AuthContextValue {
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   unlockVault: (password: string) => Promise<void>;
+  unlockVaultWithRecoveryKey: (recoveryKey: string) => Promise<void>;
+  setMasterVaultKey: (key: CryptoKey) => void;
   lockVault: () => void;
 }
 
@@ -65,9 +67,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const unlockVault = useCallback(async (password: string) => {
     if (!user) throw new Error('Not authenticated');
-    const key = await deriveKey(password, user.pbkdf2Salt);
-    setVaultKey(key);
+
+    // Fetch vault details to see if using master key wrapping model
+    const details = await authApi.getVaultDetails();
+    const wrappingKey = await deriveKey(password, details.pbkdf2Salt);
+
+    if (details.hasMasterKey && details.encryptedMasterKey && details.masterKeyIv) {
+      // Unwrap master key using password-derived wrapping key
+      const masterKey = await unwrapMasterKey(
+        details.encryptedMasterKey,
+        details.masterKeyIv,
+        wrappingKey
+      );
+      setVaultKey(masterKey);
+    } else {
+      // Direct key derivation (legacy fallback)
+      setVaultKey(wrappingKey);
+    }
   }, [user]);
+
+  const unlockVaultWithRecoveryKey = useCallback(async (recoveryKey: string) => {
+    if (!user) throw new Error('Not authenticated');
+    const details = await authApi.getVaultDetails();
+
+    if (!details.recoveryEncryptedMasterKey || !details.recoveryMasterKeyIv || !details.recoverySalt) {
+      throw new Error('No recovery key set up for this account');
+    }
+
+    const recoveryWrappingKey = await deriveKey(recoveryKey.trim().toUpperCase(), details.recoverySalt);
+    const masterKey = await unwrapMasterKey(
+      details.recoveryEncryptedMasterKey,
+      details.recoveryMasterKeyIv,
+      recoveryWrappingKey
+    );
+    setVaultKey(masterKey);
+  }, [user]);
+
+  const setMasterVaultKey = useCallback((key: CryptoKey) => {
+    setVaultKey(key);
+  }, []);
 
   const lockVault = useCallback(() => {
     setVaultKey(null);
@@ -83,6 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         unlockVault,
+        unlockVaultWithRecoveryKey,
+        setMasterVaultKey,
         lockVault,
       }}
     >

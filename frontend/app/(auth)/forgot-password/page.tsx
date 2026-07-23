@@ -85,6 +85,19 @@ export default function ForgotPasswordPage() {
               </div>
 
               <div style={{
+                background: 'var(--warning-bg)',
+                border: '1px solid rgba(245,158,11,0.25)',
+                borderRadius: 'var(--radius)',
+                padding: '12px 14px',
+                marginBottom: 16,
+                fontSize: 12,
+                color: 'var(--warning)',
+                lineHeight: 1.5,
+              }}>
+                🔑 <strong>Have a Recovery Key?</strong> You can recover your vault without losing any encrypted secrets! <Link href="/recover-vault" style={{ textDecoration: 'underline', color: 'var(--warning)', fontWeight: 600 }}>Use Recovery Key →</Link>
+              </div>
+
+              <div style={{
                 background: 'var(--danger-bg)',
                 border: '1px solid rgba(239,68,68,0.2)',
                 borderRadius: 'var(--radius)',
@@ -93,7 +106,7 @@ export default function ForgotPasswordPage() {
                 fontSize: 12,
                 color: 'var(--danger)',
               }}>
-                ⚠️ Resetting your password will permanently delete all encrypted secrets. You will need to re-enter them after reset.
+                ⚠️ Standard email password reset will clear all encrypted secrets because your encryption key is tied to your password.
               </div>
 
               <button

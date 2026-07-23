@@ -12,6 +12,8 @@ const passwordRules = [
   { label: 'One number', test: (p: string) => /[0-9]/.test(p) },
 ];
 
+import GoogleButton from '@/components/GoogleButton';
+
 export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -56,6 +58,14 @@ export default function RegisterPage() {
         <p className="auth-subtitle">Your secrets, encrypted and yours alone</p>
 
         {error && <div className="alert alert-error">{error}</div>}
+
+        <GoogleButton text="Sign up with Google" />
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: 12 }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>or</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

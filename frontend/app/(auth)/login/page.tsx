@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { authApi } from '@/lib/api';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 
+import GoogleButton from '@/components/GoogleButton';
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -22,9 +24,11 @@ export default function LoginPage() {
       const { userId } = await authApi.login(email, password);
       router.push(`/verify-otp?userId=${userId}&email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
-      const e = err as Error;
+      const e = err as { code?: string; message: string };
       if (e.message.includes('ACCOUNT_LOCKED')) {
         setError('Your account is temporarily locked due to too many failed attempts. Contact support.');
+      } else if (e.code === 'USE_GOOGLE_LOGIN' || e.message.includes('Google')) {
+        setError('This account was created with Google OAuth. Please sign in with Google below.');
       } else {
         setError('Invalid email or password.');
       }
@@ -52,6 +56,14 @@ export default function LoginPage() {
             {error}
           </div>
         )}
+
+        <GoogleButton text="Sign in with Google" />
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: 12 }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>or</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

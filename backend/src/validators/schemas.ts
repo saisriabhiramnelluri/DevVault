@@ -32,7 +32,29 @@ export const resetPasswordSchema = z.object({
     .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
     .regex(/[0-9]/, 'Must contain at least one number'),
 });
+export const googleLoginSchema = z.object({
+  code: z.string().min(1),
+  redirectUri: z.string().url(),
+});
 
+export const setupVaultSchema = z.object({
+  passwordHash: z.string().optional(),
+  encryptedMasterKey: z.string().min(1),
+  masterKeyIv: z.string().min(1),
+  recoveryEncryptedMasterKey: z.string().min(1),
+  recoveryMasterKeyIv: z.string().min(1),
+  recoverySalt: z.string().min(1),
+});
+
+export const recoverVaultSchema = z.object({
+  email: z.string().email(),
+  passwordHash: z.string().min(1),
+  encryptedMasterKey: z.string().min(1),
+  masterKeyIv: z.string().min(1),
+  newRecoveryEncryptedMasterKey: z.string().min(1),
+  newRecoveryMasterKeyIv: z.string().min(1),
+  newRecoverySalt: z.string().min(1),
+});
 export const createProjectSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),

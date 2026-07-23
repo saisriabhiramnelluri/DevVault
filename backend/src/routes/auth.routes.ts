@@ -9,6 +9,9 @@ import {
   verifyOTPSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  googleLoginSchema,
+  setupVaultSchema,
+  recoverVaultSchema,
 } from '../validators/schemas';
 import { config } from '../config';
 
@@ -32,10 +35,18 @@ const otpLimiter = rateLimit({
 
 router.post('/register', loginLimiter, validate(registerSchema), authController.register);
 router.post('/login', loginLimiter, validate(loginSchema), authController.login);
+router.post('/google', loginLimiter, validate(googleLoginSchema), authController.googleLogin);
 router.post('/verify-otp', otpLimiter, validate(verifyOTPSchema), authController.verifyOTP);
 router.post('/logout', authMiddleware, authController.logout);
 router.post('/forgot-password', loginLimiter, validate(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', loginLimiter, validate(resetPasswordSchema), authController.resetPassword);
+
+// Vault Master Key & Recovery Key routes
+router.post('/vault/setup', authMiddleware, validate(setupVaultSchema), authController.setupVault);
+router.get('/vault/details', authMiddleware, authController.getVaultDetails);
+router.get('/vault/recovery-data', loginLimiter, authController.getRecoveryData);
+router.post('/vault/recover', loginLimiter, validate(recoverVaultSchema), authController.recoverVault);
+
 router.get('/me', authMiddleware, authController.getMe);
 router.get('/pbkdf2-salt', authMiddleware, authController.getPbkdf2Salt);
 router.get('/sessions', authMiddleware, authController.getSessions);

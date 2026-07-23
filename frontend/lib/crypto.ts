@@ -92,9 +92,112 @@ export async function decrypt(
   return new TextDecoder().decode(decrypted);
 }
 
+// ── Master Key & Recovery Key Support ──────────────────────────────────────────
+
+/**
+ * Generate a random 256-bit AES-GCM Master Key.
+ */
+export async function generateMasterKey(): Promise<CryptoKey> {
+  return crypto.subtle.generateKey(
+    { name: 'AES-GCM', length: KEY_LENGTH },
+    true, // extractable so it can be wrapped/encrypted
+    ['encrypt', 'decrypt']
+  );
+}
+
+/**
+ * Generate a human-friendly recovery key: e.g. DVRK-A8F2-K9X1-M4B7-P2Q6-W3E5
+ */
+export function generateRecoveryKey(): string {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // base32 (no 0, 1, O, I to prevent confusion)
+  const getRandomChunk = () => {
+    const bytes = crypto.getRandomValues(new Uint8Array(4));
+    return Array.from(bytes).map(b => chars[b % chars.length]).join('');
+  };
+  return `DVRK-${getRandomChunk()}-${getRandomChunk()}-${getRandomChunk()}-${getRandomChunk()}-${getRandomChunk()}`;
+}
+
+/**
+ * Generate a random 32-byte salt as base64 string.
+ */
+export function generateSalt(): string {
+  const salt = crypto.getRandomValues(new Uint8Array(32));
+  return bufferToBase64(salt);
+}
+
+/**
+ * Export CryptoKey to raw base64 string.
+ */
+export async function exportKeyRaw(key: CryptoKey): Promise<string> {
+  const raw = await crypto.subtle.exportKey('raw', key);
+  return bufferToBase64(raw);
+}
+
+/**
+ * Import raw base64 string to CryptoKey.
+ */
+export async function importKeyRaw(rawBase64: string): Promise<CryptoKey> {
+  const buffer = base64ToBuffer(rawBase64);
+  return crypto.subtle.importKey(
+    'raw',
+    buffer.buffer as ArrayBuffer,
+    { name: 'AES-GCM', length: KEY_LENGTH },
+    true,
+    ['encrypt', 'decrypt']
+  );
+}
+
+/**
+ * Encrypt a Master Key using a Wrapping Key (derived from password or recovery key).
+ */
+export async function wrapMasterKey(
+  masterKey: CryptoKey,
+  wrappingKey: CryptoKey
+): Promise<{ encryptedMasterKey: string; iv: string }> {
+  const rawMasterKey = await crypto.subtle.exportKey('raw', masterKey);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    wrappingKey,
+    rawMasterKey
+  );
+
+  return {
+    encryptedMasterKey: bufferToBase64(encrypted),
+    iv: bufferToBase64(iv),
+  };
+}
+
+/**
+ * Decrypt an Encrypted Master Key using a Wrapping Key.
+ */
+export async function unwrapMasterKey(
+  encryptedMasterKeyBase64: string,
+  ivBase64: string,
+  wrappingKey: CryptoKey
+): Promise<CryptoKey> {
+  const iv = base64ToBuffer(ivBase64);
+  const ciphertext = base64ToBuffer(encryptedMasterKeyBase64);
+
+  const decryptedRaw = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    wrappingKey,
+    ciphertext
+  );
+
+  return crypto.subtle.importKey(
+    'raw',
+    decryptedRaw,
+    { name: 'AES-GCM', length: KEY_LENGTH },
+    true,
+    ['encrypt', 'decrypt']
+  );
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
+export function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
   const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
@@ -103,7 +206,7 @@ function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
   return btoa(binary);
 }
 
-function base64ToBuffer(base64: string): Uint8Array<ArrayBuffer> {
+export function base64ToBuffer(base64: string): Uint8Array<ArrayBuffer> {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length) as Uint8Array<ArrayBuffer>;
   for (let i = 0; i < binary.length; i++) {

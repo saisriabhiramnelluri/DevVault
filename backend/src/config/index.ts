@@ -28,4 +28,8 @@ export const config = {
   accountLock: {
     maxAttempts: 20,
   },
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  },
 };

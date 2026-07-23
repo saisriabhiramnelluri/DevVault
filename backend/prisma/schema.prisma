@@ -10,10 +10,20 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  passwordHash   String
-  pbkdf2Salt     String    // Per-user salt for PBKDF2 key derivation (sent to browser, not secret)
+  id                         String    @id @default(uuid())
+  email                      String    @unique
+  passwordHash               String?   // Optional: null for Google OAuth users who haven't set a vault password
+  pbkdf2Salt                 String    // Per-user salt for PBKDF2 key derivation (sent to browser, not secret)
+  authProvider               String    @default("local") // "local" | "google"
+  googleId                   String?   @unique           // Google OAuth subject ID
+
+  // Master key encryption (client-side zero-knowledge model)
+  encryptedMasterKey         String?   // Master key encrypted with password-derived wrapping key (base64)
+  masterKeyIv                String?   // IV for encryptedMasterKey (base64)
+  recoveryEncryptedMasterKey String?   // Master key encrypted with recovery-derived wrapping key (base64)
+  recoveryMasterKeyIv        String?   // IV for recoveryEncryptedMasterKey (base64)
+  recoverySalt               String?   // Salt for recovery key PBKDF2 derivation (base64)
+
   isLocked       Boolean   @default(false)
   failedAttempts Int       @default(0)
   createdAt      DateTime  @default(now())
