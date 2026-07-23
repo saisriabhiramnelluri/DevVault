@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String
+  pbkdf2Salt     String    // Per-user salt for PBKDF2 key derivation (sent to browser, not secret)
+  isLocked       Boolean   @default(false)
+  failedAttempts Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  sessions   Session[]
+  otps       OTP[]
+  projects   Project[]
+  auditLogs  AuditLog[]
+
+  @@map("users")
+}
+
+model Session {
+  id          String   @id @default(uuid())
+  userId      String
+  tokenHash   String   @unique
+  deviceInfo  String?
+  ipAddress   String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model OTP {
+  id        String     @id @default(uuid())
+  userId    String
+  codeHash  String
+  purpose   OTPPurpose
+  expiresAt DateTime
+  used      Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("otps")
+}
+
+enum OTPPurpose {
+  LOGIN
+  PASSWORD_RESET
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  stack       String[] // e.g. ["Node.js", "PostgreSQL"]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  envVars   EnvVariable[]
+  accounts  Account[]
+  commands  Command[]
+
+  @@map("projects")
+}
+
+model EnvVariable {
+  id          String          @id @default(uuid())
+  projectId   String
+  key         String          // Stored in plaintext (key names are not sensitive)
+  ciphertext  String          // AES-256-GCM encrypted value (base64)
+  iv          String          // Initialization vector (base64)
+  category    EnvCategory     @default(OTHER)
+  environment EnvEnvironment  @default(PRODUCTION)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("env_variables")
+}
+
+enum EnvCategory {
+  DATABASE
+  AUTHENTICATION
+  CLOUD
+  PAYMENTS
+  EMAIL
+  STORAGE
+  API
+  OTHER
+}
+
+enum EnvEnvironment {
+  PRODUCTION
+  DEVELOPMENT
+  STAGING
+  TESTING
+}
+
+model Account {
+  id              String   @id @default(uuid())
+  projectId       String
+  serviceName     String
+  email           String
+  username        String?
+  notesCiphertext String?  // Encrypted notes
+  notesIv         String?  // IV for notes
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Command {
+  id          String   @id @default(uuid())
+  projectId   String
+  title       String
+  description String?
+  command     String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("commands")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String   // e.g. "SECRET_CREATED", "LOGIN", "ACCOUNT_DELETED"
+  resource   String?  // e.g. "EnvVariable", "Account"
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
