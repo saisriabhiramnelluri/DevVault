@@ -4,7 +4,8 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install && npm run db:generate && npm run build && npm run db:migrate
+    rootDir: backend
+    buildCommand: npm install --include=dev && npm run db:generate && npm run build && npm run db:migrate
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -26,3 +27,4 @@ services:
         sync: false
       - key: SMTP_FROM
         sync: false
+
