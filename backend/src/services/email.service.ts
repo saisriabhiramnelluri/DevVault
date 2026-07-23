@@ -16,6 +16,14 @@ export async function sendOTPEmail(
   otp: string,
   purpose: 'LOGIN' | 'PASSWORD_RESET'
 ): Promise<void> {
+  if (!config.smtp.user || !config.smtp.pass) {
+    console.warn(`[SMTP WARNING] SMTP_USER or SMTP_PASS is missing in environment variables.`);
+    console.log(`[DEV/FALLBACK OTP] Verification code for ${email} (${purpose}): ${otp}`);
+    if (config.nodeEnv === 'development') {
+      return;
+    }
+  }
+
   const subject =
     purpose === 'LOGIN'
       ? 'Your DevVault Login Code'
@@ -91,12 +99,19 @@ export async function sendOTPEmail(
     </html>
   `;
 
-  await transporter.sendMail({
-    from: config.smtp.from,
-    to: email,
-    subject,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: config.smtp.from,
+      to: email,
+      subject,
+      html,
+    });
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error(`[SMTP ERROR] Failed to send email to ${email}:`, error.message);
+    console.log(`[EMERGENCY OTP] Code for ${email} (${purpose}): ${otp}`);
+    throw new Error('EMAIL_SEND_FAILED');
+  }
 }
 
 export async function sendLoginAlertEmail(

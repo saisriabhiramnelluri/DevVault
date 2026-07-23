@@ -35,16 +35,22 @@ export async function registerUser(email: string, password: string) {
     data: { email, passwordHash, pbkdf2Salt },
   });
 
-  // Generate and send OTP for first-time login
-  const otp = generateOTP();
-  const codeHash = await hashValue(otp);
-  const expiresAt = new Date(Date.now() + config.otp.expiresMinutes * 60000);
+  try {
+    // Generate and send OTP for first-time login
+    const otp = generateOTP();
+    const codeHash = await hashValue(otp);
+    const expiresAt = new Date(Date.now() + config.otp.expiresMinutes * 60000);
 
-  await prisma.oTP.create({
-    data: { userId: user.id, codeHash, purpose: 'LOGIN', expiresAt },
-  });
+    await prisma.oTP.create({
+      data: { userId: user.id, codeHash, purpose: 'LOGIN', expiresAt },
+    });
 
-  await sendOTPEmail(email, otp, 'LOGIN');
+    await sendOTPEmail(email, otp, 'LOGIN');
+  } catch (emailErr) {
+    // Rollback user creation if email sending fails so email isn't left stuck in EMAIL_EXISTS state
+    await prisma.user.delete({ where: { id: user.id } }).catch(() => {});
+    throw emailErr;
+  }
 
   return { userId: user.id, email: user.email };
 }

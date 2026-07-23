@@ -14,6 +14,11 @@ export interface GoogleUserInfo {
 export async function exchangeCodeForGoogleUser(code: string, redirectUri: string): Promise<GoogleUserInfo> {
   const tokenUrl = 'https://oauth2.googleapis.com/token';
 
+  if (!config.google.clientId || !config.google.clientSecret) {
+    console.error('[OAuth Config Error] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variable is missing on backend server.');
+    throw new Error('GOOGLE_CREDENTIALS_MISSING: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not configured on server');
+  }
+
   const params = new URLSearchParams({
     code,
     client_id: config.google.clientId,
@@ -30,13 +35,13 @@ export async function exchangeCodeForGoogleUser(code: string, redirectUri: strin
 
   if (!tokenRes.ok) {
     const errorData = await tokenRes.text();
-    console.error('Google token exchange error:', errorData);
-    throw new Error('GOOGLE_AUTH_FAILED');
+    console.error('[Google OAuth Error] Token exchange error details:', errorData);
+    throw new Error(`GOOGLE_TOKEN_EXCHANGE_FAILED: ${errorData}`);
   }
 
   const tokens = (await tokenRes.json()) as { access_token?: string; id_token?: string };
   if (!tokens.access_token) {
-    throw new Error('GOOGLE_AUTH_FAILED');
+    throw new Error('GOOGLE_AUTH_FAILED: No access token returned');
   }
 
   // Fetch User Info using Access Token

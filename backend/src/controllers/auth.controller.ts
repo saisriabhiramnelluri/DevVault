@@ -29,8 +29,12 @@ export async function register(req: Request, res: Response): Promise<void> {
       res.status(409).json({ error: 'EMAIL_EXISTS', message: 'Email already registered' });
       return;
     }
+    if (err.message === 'EMAIL_SEND_FAILED') {
+      res.status(500).json({ error: 'EMAIL_SEND_FAILED', message: 'Failed to send OTP verification email. Please check server SMTP credentials.' });
+      return;
+    }
     console.error('Register error:', err);
-    res.status(500).json({ error: 'SERVER_ERROR', message: 'Registration failed' });
+    res.status(500).json({ error: 'SERVER_ERROR', message: err.message || 'Registration failed' });
   }
 }
 
@@ -180,8 +184,8 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
     });
   } catch (error: unknown) {
     const err = error as Error;
-    console.error('Google login controller error:', err);
-    res.status(401).json({ error: 'GOOGLE_AUTH_FAILED', message: 'Google authentication failed' });
+    console.error('Google login controller error:', err.message);
+    res.status(401).json({ error: 'GOOGLE_AUTH_FAILED', message: err.message || 'Google authentication failed' });
   }
 }
 
