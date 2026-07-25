@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import {
   deriveKey,
   unwrapMasterKey,
@@ -22,6 +23,7 @@ const passwordRules = [
 
 export default function RecoverVaultPage() {
   const router = useRouter();
+  const { toast } = useToast();
 
   const [step, setStep] = useState<'input' | 'new-password' | 'new-recovery'>('input');
   const [email, setEmail] = useState('');
@@ -59,10 +61,13 @@ export default function RecoverVaultPage() {
       );
 
       setUnwrappedMasterKey(masterKey);
+      toast.success('Recovery key verified! Vault key decrypted.');
       setStep('new-password');
     } catch (err: unknown) {
       console.error('Recovery error:', err);
-      setError('Invalid recovery key or email. Please check and try again.');
+      const msg = 'Invalid recovery key or email. Please check and try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -74,12 +79,15 @@ export default function RecoverVaultPage() {
 
     const isValid = passwordRules.every((r) => r.test(newPassword));
     if (!isValid) {
-      setError('New password does not meet requirements.');
+      const msg = 'New password does not meet requirements.';
+      setError(msg);
+      toast.warning(msg);
       return;
     }
 
     if (!unwrappedMasterKey) {
       setError('Session expired. Please restart recovery process.');
+      toast.error('Session expired. Please restart recovery.');
       setStep('input');
       return;
     }
@@ -91,7 +99,6 @@ export default function RecoverVaultPage() {
       const newRecoverySalt = generateSalt();
 
       // 2. Derive new password wrapping key using email's pbkdf2Salt
-      // We fetch current pbkdf2Salt from recoveryData
       const recoveryData = await authApi.getRecoveryData(email.trim());
       const passwordWrappingKey = await deriveKey(newPassword, recoveryData.pbkdf2Salt);
       const newRecoveryWrappingKey = await deriveKey(generatedNewRecoveryKey, newRecoverySalt);
@@ -100,8 +107,7 @@ export default function RecoverVaultPage() {
       const passwordWrapped = await wrapMasterKey(unwrappedMasterKey, passwordWrappingKey);
       const recoveryWrapped = await wrapMasterKey(unwrappedMasterKey, newRecoveryWrappingKey);
 
-      // Simple bcrypt-like password hash simulation for backend auth verification
-      // (Backend will receive passwordHash)
+      // Simple password hash for backend auth verification
       const enc = new TextEncoder();
       const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(newPassword));
       const passwordHashHex = bufferToBase64(hashBuf);
@@ -118,10 +124,13 @@ export default function RecoverVaultPage() {
       });
 
       setNewRecoveryKey(generatedNewRecoveryKey);
+      toast.success('Vault password updated successfully!');
       setStep('new-recovery');
     } catch (err: unknown) {
       console.error('Password reset error:', err);
-      setError('Failed to update vault password. Please try again.');
+      const msg = 'Failed to update vault password. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -130,6 +139,7 @@ export default function RecoverVaultPage() {
   const handleCopyNewRecoveryKey = () => {
     navigator.clipboard.writeText(newRecoveryKey);
     setCopied(true);
+    toast.success('New recovery key copied to clipboard!');
     setTimeout(() => setCopied(false), 3000);
   };
 
@@ -232,9 +242,10 @@ export default function RecoverVaultPage() {
                         <li key={rule.label} style={{
                           display: 'flex', alignItems: 'center', gap: 6,
                           fontSize: 12,
-                          color: passed ? 'var(--success)' : 'var(--text-muted)'
+                          color: passed ? 'var(--success)' : 'var(--text-muted)',
+                          transition: 'color 0.2s ease',
                         }}>
-                          <Check size={12} style={{ opacity: passed ? 1 : 0.3 }} />
+                          <Check size={12} style={{ opacity: passed ? 1 : 0.3, transition: 'opacity 0.2s' }} />
                           {rule.label}
                         </li>
                       );
@@ -258,7 +269,7 @@ export default function RecoverVaultPage() {
 
         {step === 'new-recovery' && (
           <div>
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
               <div style={{
                 width: 48,
                 height: 48,
@@ -273,7 +284,7 @@ export default function RecoverVaultPage() {
                 <Key size={24} />
               </div>
               <h1 className="auth-title">New Recovery Key Generated</h1>
-              <p className="auth-subtitle">
+              <p className="auth-subtitle" style={{ marginBottom: 0 }}>
                 Your vault password has been updated and a new Recovery Key has been generated for your account.
               </p>
             </div>
@@ -282,18 +293,19 @@ export default function RecoverVaultPage() {
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border-strong)',
               borderRadius: 'var(--radius)',
-              padding: '16px',
+              padding: '20px',
               margin: '20px 0',
               textAlign: 'center'
             }}>
               <div style={{
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: 700,
                 letterSpacing: '1.5px',
                 fontFamily: 'monospace',
                 color: 'var(--text)',
                 userSelect: 'all',
-                wordBreak: 'break-all'
+                wordBreak: 'break-all',
+                lineHeight: 1.6,
               }}>
                 {newRecoveryKey}
               </div>
@@ -301,7 +313,7 @@ export default function RecoverVaultPage() {
               <button
                 onClick={handleCopyNewRecoveryKey}
                 className="btn btn-secondary btn-sm"
-                style={{ marginTop: 12, marginInline: 'auto' }}
+                style={{ marginTop: 14, marginInline: 'auto' }}
               >
                 {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
                 {copied ? 'Copied to Clipboard!' : 'Copy New Recovery Key'}
@@ -327,7 +339,10 @@ export default function RecoverVaultPage() {
             </label>
 
             <button
-              onClick={() => router.push('/login?recovered=true')}
+              onClick={() => {
+                toast.success('Vault recovered! Redirecting to login...');
+                router.push('/login?recovered=true');
+              }}
               disabled={!confirmedSave}
               className="btn btn-primary btn-lg"
               style={{ width: '100%', justifyContent: 'center' }}
@@ -337,7 +352,7 @@ export default function RecoverVaultPage() {
           </div>
         )}
 
-        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)' }}>
+        <p className="auth-footer">
           <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--primary)' }}>
             <ArrowLeft size={12} /> Back to login
           </Link>

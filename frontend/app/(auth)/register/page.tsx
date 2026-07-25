@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { Shield, Eye, EyeOff, Loader2, Check } from 'lucide-react';
+import GoogleButton from '@/components/GoogleButton';
 
 const passwordRules = [
   { label: 'At least 8 characters', test: (p: string) => p.length >= 8 },
@@ -12,10 +14,9 @@ const passwordRules = [
   { label: 'One number', test: (p: string) => /[0-9]/.test(p) },
 ];
 
-import GoogleButton from '@/components/GoogleButton';
-
 export default function RegisterPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -27,20 +28,24 @@ export default function RegisterPage() {
     setError('');
     const allValid = passwordRules.every((r) => r.test(password));
     if (!allValid) {
-      setError('Password does not meet requirements.');
+      const msg = 'Password does not meet requirements.';
+      setError(msg);
+      toast.warning(msg);
       return;
     }
     setLoading(true);
     try {
       const { userId } = await authApi.register(email, password);
+      toast.success('Verification code sent to your email');
       router.push(`/verify-otp?userId=${userId}&email=${encodeURIComponent(email)}&mode=register`);
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };
+      let msg = 'Registration failed. Please try again.';
       if (e.code === 'EMAIL_EXISTS') {
-        setError('An account with this email already exists.');
-      } else {
-        setError('Registration failed. Please try again.');
+        msg = 'An account with this email already exists.';
       }
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -61,10 +66,10 @@ export default function RegisterPage() {
 
         <GoogleButton text="Sign up with Google" />
 
-        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: 12 }}>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>or</span>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+        <div className="auth-divider">
+          <div className="auth-divider-line" />
+          <span className="auth-divider-text">or</span>
+          <div className="auth-divider-line" />
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -113,9 +118,10 @@ export default function RegisterPage() {
                     <li key={rule.label} style={{
                       display: 'flex', alignItems: 'center', gap: 6,
                       fontSize: 12,
-                      color: passed ? 'var(--success)' : 'var(--text-muted)'
+                      color: passed ? 'var(--success)' : 'var(--text-muted)',
+                      transition: 'color 0.2s ease',
                     }}>
-                      <Check size={12} style={{ opacity: passed ? 1 : 0.3 }} />
+                      <Check size={12} style={{ opacity: passed ? 1 : 0.3, transition: 'opacity 0.2s' }} />
                       {rule.label}
                     </li>
                   );
@@ -128,10 +134,11 @@ export default function RegisterPage() {
             background: 'var(--warning-bg)',
             border: '1px solid rgba(245,158,11,0.25)',
             borderRadius: 'var(--radius)',
-            padding: '10px 12px',
-            marginBottom: 16,
+            padding: '12px 14px',
+            marginBottom: 18,
             fontSize: 12,
             color: 'var(--warning)',
+            lineHeight: 1.5,
           }}>
             ⚠️ Your password encrypts your vault. If you forget it, encrypted secrets are unrecoverable.
           </div>
@@ -147,21 +154,11 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)' }}>
+        <p className="auth-footer">
           Already have an account?{' '}
           <Link href="/login" className="text-primary" style={{ fontWeight: 500 }}>Sign in</Link>
         </p>
       </div>
-
-      <style jsx>{`
-        .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 20px; }
-        .auth-card { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; box-shadow: var(--shadow-md); }
-        .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-        .logo-icon { width: 34px; height: 34px; background: var(--text); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
-        .logo-text { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-        .auth-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
-        .auth-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
-      `}</style>
     </div>
   );
 }

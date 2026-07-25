@@ -4,6 +4,7 @@ import { useState, useRef, KeyboardEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { Shield, Loader2 } from 'lucide-react';
 
 function OTPForm() {
@@ -12,6 +13,7 @@ function OTPForm() {
   const userId = params.get('userId') || '';
   const email = params.get('email') || '';
   const { login } = useAuth();
+  const { toast } = useToast();
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -57,12 +59,15 @@ function OTPForm() {
     try {
       const { token } = await authApi.verifyOTP(userId, finalCode);
       await login(token);
+      toast.success('Login successful!');
       router.push('/dashboard');
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };
-      if (e.code === 'OTP_EXPIRED') setError('Code expired. Please go back and login again.');
-      else if (e.code === 'OTP_INVALID') setError('Invalid code. Please check and try again.');
-      else setError('Verification failed. Please try again.');
+      let msg = 'Verification failed. Please try again.';
+      if (e.code === 'OTP_EXPIRED') msg = 'Code expired. Please go back and login again.';
+      else if (e.code === 'OTP_INVALID') msg = 'Invalid code. Please check and try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -84,7 +89,13 @@ function OTPForm() {
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', margin: '24px 0' }}>
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          justifyContent: 'center',
+          margin: '24px 0',
+          flexWrap: 'wrap',
+        }}>
           {code.map((digit, i) => (
             <input
               key={i}
@@ -97,20 +108,28 @@ function OTPForm() {
               onKeyDown={(e) => handleKeyDown(i, e)}
               onPaste={handlePaste}
               style={{
-                width: 48,
-                height: 56,
+                width: 46,
+                height: 54,
                 textAlign: 'center',
                 fontSize: 22,
                 fontWeight: 700,
-                border: '1px solid var(--border)',
+                border: `2px solid ${digit ? 'var(--primary)' : 'var(--border)'}`,
                 borderRadius: 'var(--radius)',
                 background: 'var(--surface)',
                 color: 'var(--text)',
                 outline: 'none',
-                transition: 'border-color 0.15s',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
                 fontFamily: 'monospace',
+                caretColor: 'var(--primary)',
               }}
-              className="otp-input"
+              onFocus={(e) => {
+                e.target.style.borderColor = 'var(--primary)';
+                e.target.style.boxShadow = '0 0 0 3px rgba(56, 189, 248, 0.12)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = digit ? 'var(--primary)' : 'var(--border)';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           ))}
         </div>
@@ -129,17 +148,6 @@ function OTPForm() {
           Code expires in 5 minutes · Single use only
         </p>
       </div>
-
-      <style jsx>{`
-        .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 20px; }
-        .auth-card { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; box-shadow: var(--shadow-md); }
-        .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-        .logo-icon { width: 34px; height: 34px; background: var(--text); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
-        .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
-        .auth-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-        .auth-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
-        :global(.otp-input:focus) { border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12); }
-      `}</style>
     </div>
   );
 }

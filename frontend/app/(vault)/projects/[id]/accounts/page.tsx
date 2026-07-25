@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { accountsApi, Account, CreateAccountDto } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { encrypt, decrypt } from '@/lib/crypto';
 import {
   Plus, Search, Edit, Trash2, X, Loader2, Users, Copy, Check, EyeOff, Eye,
@@ -118,6 +119,7 @@ function AccountCard({
   onDelete: (id: string) => void;
   onRequestUnlock: () => void;
 }) {
+  const { toast } = useToast();
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [notes, setNotes] = useState<string | null>(null);
   const [showNotes, setShowNotes] = useState(false);
@@ -130,12 +132,15 @@ function AccountCard({
       const decrypted = await decrypt(vaultKey, account.notesCiphertext, account.notesIv);
       setNotes(decrypted);
       setShowNotes(true);
-    } catch { /* ignore */ }
+    } catch {
+      toast.error('Failed to decrypt notes.');
+    }
   };
 
   const copyEmail = async () => {
     await navigator.clipboard.writeText(account.email);
     setCopiedEmail(true);
+    toast.success('Email copied');
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
@@ -235,6 +240,7 @@ export default function AccountsPage() {
   const params = useParams();
   const projectId = params.id as string;
   const { vaultKey, unlockVault } = useAuth();
+  const { toast } = useToast();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -258,9 +264,15 @@ export default function AccountsPage() {
   );
 
   const handleDelete = async (id: string) => {
-    await accountsApi.delete(projectId, id);
-    setAccounts((prev) => prev.filter((a) => a.id !== id));
-    setDeleteId(null);
+    try {
+      await accountsApi.delete(projectId, id);
+      setAccounts((prev) => prev.filter((a) => a.id !== id));
+      setDeleteId(null);
+      toast.success('Account deleted');
+    } catch {
+      toast.error('Failed to delete account');
+      setDeleteId(null);
+    }
   };
 
   return (

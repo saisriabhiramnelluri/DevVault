@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
+import { Menu } from 'lucide-react';
 
 export default function VaultLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,7 +35,19 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
 
   return (
     <div style={{ display: 'flex' }}>
-      <Sidebar />
+      {/* Mobile hamburger */}
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setMobileMenuOpen((v) => !v)}
+        aria-label="Toggle menu"
+      >
+        <Menu size={18} />
+      </button>
+
+      <Sidebar
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
       <main className="main-content">{children}</main>
     </div>
   );

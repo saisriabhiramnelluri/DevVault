@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { accountsApi, AccountWithProject } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { Search, Users, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function GlobalAccountsPage() {
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [results, setResults] = useState<AccountWithProject[]>([]);
   const [searched, setSearched] = useState(false);
@@ -20,9 +22,13 @@ export default function GlobalAccountsPage() {
       const { accounts } = await accountsApi.searchByEmail(email);
       setResults(accounts);
       setSearched(true);
+      if (accounts.length > 0) {
+        toast.success(`Found ${accounts.length} service${accounts.length !== 1 ? 's' : ''}`);
+      }
     } catch {
       setSearched(true);
       setResults([]);
+      toast.error('Search failed. Please try again.');
     } finally {
       setLoading(false);
     }

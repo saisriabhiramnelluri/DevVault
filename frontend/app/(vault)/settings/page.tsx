@@ -3,13 +3,17 @@
 import { useEffect, useState } from 'react';
 import { authApi, Session, AuditLog } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { Monitor, Trash2, Loader2, ShieldCheck, Clock, FileText } from 'lucide-react';
 import { formatDateTime, formatDistanceToNow } from '@/lib/dateUtils';
 
 const ACTION_LABELS: Record<string, string> = {
   LOGIN: '🔐 Login',
+  LOGIN_GOOGLE: '🔐 Google Login',
   LOGOUT: '🚪 Logout',
   PASSWORD_RESET: '🔑 Password reset',
+  VAULT_SETUP: '🛡️ Vault setup',
+  VAULT_RECOVERED: '🔓 Vault recovered',
   PROJECT_CREATED: '📁 Project created',
   PROJECT_UPDATED: '✏️ Project updated',
   PROJECT_DELETED: '🗑️ Project deleted',
@@ -29,6 +33,7 @@ type Tab = 'sessions' | 'audit';
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
+  const { toast } = useToast();
   const [tab, setTab] = useState<Tab>('sessions');
   const [sessions, setSessions] = useState<Session[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -62,6 +67,9 @@ export default function SettingsPage() {
     try {
       await authApi.revokeSession(id);
       setSessions((prev) => prev.filter((s) => s.id !== id));
+      toast.success('Session revoked');
+    } catch {
+      toast.error('Failed to revoke session');
     } finally {
       setRevoking(null);
     }
@@ -73,8 +81,21 @@ export default function SettingsPage() {
         <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Settings</h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>Manage sessions and security</p>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 2, marginTop: 20, borderBottom: '1px solid var(--border)', marginLeft: -32, marginRight: -32, paddingLeft: 32, paddingBottom: 0 }}>
+        {/* Tabs — scrollable on mobile */}
+        <div style={{
+          display: 'flex',
+          gap: 2,
+          marginTop: 20,
+          borderBottom: '1px solid var(--border)',
+          marginLeft: -32,
+          marginRight: -32,
+          paddingLeft: 32,
+          paddingBottom: 0,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}>
           {[
             { key: 'sessions', label: 'Active Sessions', icon: Monitor },
             { key: 'audit', label: 'Audit Log', icon: FileText },
@@ -89,6 +110,8 @@ export default function SettingsPage() {
                 color: tab === key ? 'var(--primary-text)' : 'var(--text-secondary)',
                 borderBottom: tab === key ? '2px solid var(--primary)' : '2px solid transparent',
                 marginBottom: -1, fontFamily: 'inherit',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               <Icon size={14} /> {label}
@@ -100,18 +123,19 @@ export default function SettingsPage() {
       <div className="page-content">
         <div style={{ maxWidth: 640 }}>
           {/* Profile card */}
-          <div className="card" style={{ padding: 18, marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{
-                width: 44, height: 44, borderRadius: 10,
+                width: 46, height: 46, borderRadius: 12,
                 background: 'var(--primary-bg)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 18, fontWeight: 700, color: 'var(--primary-text)',
+                flexShrink: 0,
               }}>
                 {user?.email.charAt(0).toUpperCase()}
               </div>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{user?.email}</p>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
                   <ShieldCheck size={12} style={{ color: 'var(--success)' }} />
                   <span style={{ fontSize: 11, color: 'var(--success)' }}>2FA enabled · Vault encrypted</span>
@@ -123,7 +147,7 @@ export default function SettingsPage() {
           {/* Sessions tab */}
           {tab === 'sessions' && (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
                   Active Sessions <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({sessions.length})</span>
                 </p>
@@ -143,8 +167,8 @@ export default function SettingsPage() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {sessions.map((session) => (
-                    <div key={session.id} className="card" style={{ padding: '12px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div key={session.id} className="card" style={{ padding: '14px 18px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                         <Monitor size={18} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -158,6 +182,7 @@ export default function SettingsPage() {
                           className="btn btn-danger btn-sm"
                           onClick={() => handleRevokeSession(session.id)}
                           disabled={revoking === session.id}
+                          style={{ flexShrink: 0 }}
                         >
                           {revoking === session.id
                             ? <Loader2 size={12} style={{ animation: 'spin 0.6s linear infinite' }} />
@@ -174,7 +199,10 @@ export default function SettingsPage() {
               <div style={{ marginTop: 20 }}>
                 <button
                   className="btn btn-danger"
-                  onClick={() => logout()}
+                  onClick={() => {
+                    toast.info('Signing out of all devices...');
+                    logout();
+                  }}
                 >
                   Sign out of all devices
                 </button>
@@ -198,12 +226,12 @@ export default function SettingsPage() {
                     <div
                       key={log.id}
                       style={{
-                        padding: '10px 16px',
+                        padding: '12px 18px',
                         borderBottom: i < auditLogs.length - 1 ? '1px solid var(--border)' : 'none',
                         display: 'flex', alignItems: 'center', gap: 12,
                       }}
                     >
-                      <div style={{ flex: 1 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: 13, color: 'var(--text)' }}>
                           {ACTION_LABELS[log.action] || log.action}
                           {log.resource && <span style={{ color: 'var(--text-muted)', fontSize: 11, marginLeft: 6 }}>· {log.resource}</span>}

@@ -66,7 +66,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="page-content">
-        {/* Action cards — RailOne style */}
+        {/* Action cards */}
         <div className="grid-2" style={{ marginBottom: 32, maxWidth: 720 }}>
           {ACTION_CARDS.map(({ title, description, icon: Icon, href, color }) => (
             <Link
@@ -77,7 +77,7 @@ export default function DashboardPage() {
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                 <div style={{
-                  width: 40, height: 40,
+                  width: 42, height: 42,
                   borderRadius: 10,
                   background: `${color}18`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -85,15 +85,15 @@ export default function DashboardPage() {
                 }}>
                   <Icon size={18} style={{ color }} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 3 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
                     {title}
                   </p>
                   <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
                     {description}
                   </p>
                 </div>
-                <ChevronRight size={15} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
+                <ChevronRight size={15} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 3 }} />
               </div>
             </Link>
           ))}
@@ -109,9 +109,9 @@ export default function DashboardPage() {
           </div>
 
           {loading ? (
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
               {[1, 2, 3].map((i) => (
-                <div key={i} className="card" style={{ padding: 16, flex: 1, height: 80, background: 'var(--surface-hover)' }} />
+                <div key={i} className="card" style={{ padding: 16, height: 72, background: 'var(--surface-hover)', opacity: 0.6 }} />
               ))}
             </div>
           ) : projects.length === 0 ? (
@@ -129,24 +129,24 @@ export default function DashboardPage() {
                 <Link
                   key={project.id}
                   href={`/projects/${project.id}`}
-                  className="card"
+                  className="card card-interactive"
                   style={{ padding: '14px 18px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14 }}
                 >
                   <div style={{
-                    width: 36, height: 36, borderRadius: 8,
+                    width: 38, height: 38, borderRadius: 10,
                     background: 'var(--primary-bg)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0,
                   }}>
                     <FolderOpen size={16} style={{ color: 'var(--primary-text)' }} />
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{project.name}</p>
                     <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                       {project._count?.envVars || 0} vars · {project._count?.accounts || 0} accounts · {project._count?.commands || 0} commands
                     </p>
                   </div>
-                  <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />
+                  <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 </Link>
               ))}
             </div>

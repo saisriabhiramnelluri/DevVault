@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import {
   generateMasterKey,
   generateRecoveryKey,
@@ -22,6 +23,7 @@ const passwordRules = [
 export default function SetVaultPasswordPage() {
   const router = useRouter();
   const { user, setMasterVaultKey } = useAuth();
+  const { toast } = useToast();
 
   const [step, setStep] = useState<'password' | 'recovery'>('password');
   const [password, setPassword] = useState('');
@@ -41,7 +43,9 @@ export default function SetVaultPasswordPage() {
 
     const isValid = passwordRules.every((r) => r.test(password));
     if (!isValid) {
-      setError('Password does not meet minimum security requirements.');
+      const msg = 'Password does not meet minimum security requirements.';
+      setError(msg);
+      toast.warning(msg);
       return;
     }
 
@@ -75,10 +79,13 @@ export default function SetVaultPasswordPage() {
 
       setMasterKey(newMasterKey);
       setRecoveryKey(newRecoveryKey);
+      toast.success('Vault initialized successfully!');
       setStep('recovery');
     } catch (err: unknown) {
       console.error('Vault setup error:', err);
-      setError('Failed to setup vault. Please try again.');
+      const msg = 'Failed to setup vault. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -87,6 +94,7 @@ export default function SetVaultPasswordPage() {
   const handleCopyRecoveryKey = () => {
     navigator.clipboard.writeText(recoveryKey);
     setCopied(true);
+    toast.success('Recovery key copied to clipboard!');
     setTimeout(() => setCopied(false), 3000);
   };
 
@@ -94,6 +102,7 @@ export default function SetVaultPasswordPage() {
     if (masterKey) {
       setMasterVaultKey(masterKey);
     }
+    toast.success('Vault setup complete!');
     router.push('/dashboard');
   };
 
@@ -146,9 +155,10 @@ export default function SetVaultPasswordPage() {
                         <li key={rule.label} style={{
                           display: 'flex', alignItems: 'center', gap: 6,
                           fontSize: 12,
-                          color: passed ? 'var(--success)' : 'var(--text-muted)'
+                          color: passed ? 'var(--success)' : 'var(--text-muted)',
+                          transition: 'color 0.2s ease',
                         }}>
-                          <Check size={12} style={{ opacity: passed ? 1 : 0.3 }} />
+                          <Check size={12} style={{ opacity: passed ? 1 : 0.3, transition: 'opacity 0.2s' }} />
                           {rule.label}
                         </li>
                       );
@@ -167,7 +177,8 @@ export default function SetVaultPasswordPage() {
                 color: 'var(--warning)',
                 display: 'flex',
                 gap: 10,
-                alignItems: 'flex-start'
+                alignItems: 'flex-start',
+                lineHeight: 1.5,
               }}>
                 <ShieldAlert size={18} style={{ flexShrink: 0, marginTop: 2 }} />
                 <div>
@@ -188,7 +199,7 @@ export default function SetVaultPasswordPage() {
           </div>
         ) : (
           <div>
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
               <div style={{
                 width: 48,
                 height: 48,
@@ -203,7 +214,7 @@ export default function SetVaultPasswordPage() {
                 <Key size={24} />
               </div>
               <h1 className="auth-title">Your Recovery Key</h1>
-              <p className="auth-subtitle">
+              <p className="auth-subtitle" style={{ marginBottom: 0 }}>
                 Save this key in a secure password manager or physical notebook. It allows you to recover your vault if you ever forget your vault password.
               </p>
             </div>
@@ -213,19 +224,20 @@ export default function SetVaultPasswordPage() {
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border-strong)',
               borderRadius: 'var(--radius)',
-              padding: '16px',
+              padding: '20px',
               margin: '20px 0',
               textAlign: 'center',
               position: 'relative'
             }}>
               <div style={{
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: 700,
                 letterSpacing: '1.5px',
                 fontFamily: 'monospace',
                 color: 'var(--text)',
                 userSelect: 'all',
-                wordBreak: 'break-all'
+                wordBreak: 'break-all',
+                lineHeight: 1.6,
               }}>
                 {recoveryKey}
               </div>
@@ -233,7 +245,7 @@ export default function SetVaultPasswordPage() {
               <button
                 onClick={handleCopyRecoveryKey}
                 className="btn btn-secondary btn-sm"
-                style={{ marginTop: 12, marginInline: 'auto' }}
+                style={{ marginTop: 14, marginInline: 'auto' }}
               >
                 {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
                 {copied ? 'Copied to Clipboard!' : 'Copy Recovery Key'}

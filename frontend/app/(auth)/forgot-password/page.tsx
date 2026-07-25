@@ -4,12 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { Shield, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 type Step = 'email' | 'reset';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -26,9 +28,12 @@ export default function ForgotPasswordPage() {
     try {
       await authApi.forgotPassword(email);
       setMessage('If that email is registered, a reset code has been sent.');
+      toast.success('Reset code sent! Check your email.');
       setStep('reset');
     } catch {
-      setError('Something went wrong. Please try again.');
+      const msg = 'Something went wrong. Please try again.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -38,18 +43,23 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError('');
     if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      setError('Password must be at least 8 chars with one uppercase and one number.');
+      const msg = 'Password must be at least 8 chars with one uppercase and one number.';
+      setError(msg);
+      toast.warning(msg);
       return;
     }
     setLoading(true);
     try {
       await authApi.resetPassword(email, code, newPassword);
+      toast.success('Password reset successful! Please login.');
       router.push('/login?reset=true');
     } catch (err: unknown) {
       const e = err as { code?: string };
-      if (e.code === 'OTP_EXPIRED') setError('Code expired. Please request a new one.');
-      else if (e.code === 'OTP_INVALID') setError('Invalid code.');
-      else setError('Reset failed. Please try again.');
+      let msg = 'Reset failed. Please try again.';
+      if (e.code === 'OTP_EXPIRED') msg = 'Code expired. Please request a new one.';
+      else if (e.code === 'OTP_INVALID') msg = 'Invalid code.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -101,10 +111,11 @@ export default function ForgotPasswordPage() {
                 background: 'var(--danger-bg)',
                 border: '1px solid rgba(239,68,68,0.2)',
                 borderRadius: 'var(--radius)',
-                padding: '10px 12px',
-                marginBottom: 16,
+                padding: '12px 14px',
+                marginBottom: 18,
                 fontSize: 12,
                 color: 'var(--danger)',
+                lineHeight: 1.5,
               }}>
                 ⚠️ Standard email password reset will clear all encrypted secrets because your encryption key is tied to your password.
               </div>
@@ -131,7 +142,7 @@ export default function ForgotPasswordPage() {
             </button>
 
             <h1 className="auth-title">Enter reset code</h1>
-            {message && <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>{message}</p>}
+            {message && <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>{message}</p>}
 
             {error && <div className="alert alert-error">{error}</div>}
 
@@ -189,22 +200,12 @@ export default function ForgotPasswordPage() {
           </>
         )}
 
-        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)' }}>
+        <p className="auth-footer">
           <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--primary)' }}>
             <ArrowLeft size={12} /> Back to login
           </Link>
         </p>
       </div>
-
-      <style jsx>{`
-        .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 20px; }
-        .auth-card { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; box-shadow: var(--shadow-md); }
-        .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-        .logo-icon { width: 34px; height: 34px; background: var(--text); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
-        .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
-        .auth-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-        .auth-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
-      `}</style>
     </div>
   );
 }

@@ -1,21 +1,29 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { Shield, Loader2 } from 'lucide-react';
 
 function GoogleCallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
+  const { toast } = useToast();
   const [error, setError] = useState('');
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // Guard against React Strict Mode / Suspense re-mounts calling this twice
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
     const code = searchParams.get('code');
     if (!code) {
       setError('No authorization code received from Google.');
+      toast.error('No authorization code received from Google.');
       return;
     }
 
@@ -33,11 +41,13 @@ function GoogleCallbackHandler() {
       } catch (err: unknown) {
         console.error('Google callback error:', err);
         setError('Google authentication failed. Please try again.');
+        toast.error('Google authentication failed. Please try again.');
       }
     }
 
     void processOAuth();
-  }, [searchParams, login, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="auth-page">
@@ -62,16 +72,6 @@ function GoogleCallbackHandler() {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 20px; }
-        .auth-card { width: 100%; max-width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; box-shadow: var(--shadow-md); }
-        .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-        .logo-icon { width: 34px; height: 34px; background: var(--text); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
-        .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
-        .auth-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-        .auth-subtitle { font-size: 13px; color: var(--text-secondary); }
-      `}</style>
     </div>
   );
 }

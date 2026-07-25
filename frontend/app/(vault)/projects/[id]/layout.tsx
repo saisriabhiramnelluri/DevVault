@@ -39,8 +39,8 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
           <ArrowLeft size={12} /> Projects
         </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-          <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ minWidth: 0 }}>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>
               {project?.name || '...'}
             </h1>
@@ -48,7 +48,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>{project.description}</p>
             )}
           </div>
-          <Link href={`/projects/${projectId}/edit`} className="btn btn-secondary btn-sm">
+          <Link href={`/projects/${projectId}/edit`} className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
             <Edit size={13} /> Edit
           </Link>
         </div>
@@ -62,8 +62,21 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
           </div>
         )}
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 2, marginTop: 20, borderBottom: '1px solid var(--border)', marginLeft: -32, marginRight: -32, paddingLeft: 32, paddingBottom: 0 }}>
+        {/* Tabs — scrollable on mobile */}
+        <div style={{
+          display: 'flex',
+          gap: 2,
+          marginTop: 20,
+          borderBottom: '1px solid var(--border)',
+          marginLeft: -32,
+          marginRight: -32,
+          paddingLeft: 32,
+          paddingBottom: 0,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}>
           {tabs.map(({ label, href, icon: Icon }) => (
             <Link
               key={href}
@@ -80,6 +93,8 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
                 borderBottom: isActive(href) ? '2px solid var(--primary)' : '2px solid transparent',
                 marginBottom: -1,
                 transition: 'color 0.15s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               <Icon size={14} />

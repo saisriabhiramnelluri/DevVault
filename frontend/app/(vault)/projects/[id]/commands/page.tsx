@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { commandsApi, Command } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { Plus, Search, Edit, Trash2, X, Loader2, Terminal, Copy, Check } from 'lucide-react';
 
 function CommandModal({ projectId, editing, onSave, onClose }: {
@@ -71,11 +72,13 @@ function CommandModal({ projectId, editing, onSave, onClose }: {
 function CommandCard({ cmd, onEdit, onDelete }: {
   cmd: Command; onEdit: (c: Command) => void; onDelete: (id: string) => void;
 }) {
+  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(cmd.command);
     setCopied(true);
+    toast.success('Command copied');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -121,6 +124,7 @@ function CommandCard({ cmd, onEdit, onDelete }: {
 export default function CommandsPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { toast } = useToast();
   const [commands, setCommands] = useState<Command[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -143,9 +147,15 @@ export default function CommandsPage() {
   );
 
   const handleDelete = async (id: string) => {
-    await commandsApi.delete(projectId, id);
-    setCommands((prev) => prev.filter((c) => c.id !== id));
-    setDeleteId(null);
+    try {
+      await commandsApi.delete(projectId, id);
+      setCommands((prev) => prev.filter((c) => c.id !== id));
+      setDeleteId(null);
+      toast.success('Command deleted');
+    } catch {
+      toast.error('Failed to delete command');
+      setDeleteId(null);
+    }
   };
 
   return (

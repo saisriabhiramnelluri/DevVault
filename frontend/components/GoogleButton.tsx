@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useToast } from '@/components/Toast';
 
 interface GoogleButtonProps {
   text?: string;
@@ -13,10 +14,12 @@ export default function GoogleButton({
   className = '',
   disabled = false,
 }: GoogleButtonProps) {
+  const { toast } = useToast();
+
   const handleGoogleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) {
-      alert('Google Client ID is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in your environment variables.');
+      toast.error('Google Client ID is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in your environment variables.');
       return;
     }
 

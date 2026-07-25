@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { envVarsApi, EnvVariable, EnvCategory, EnvEnvironment, ParsedEnvVar } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { encrypt, decrypt } from '@/lib/crypto';
 import {
   Plus, Search, Eye, EyeOff, Copy, Edit, Trash2, Upload, X,
@@ -75,6 +76,7 @@ function EnvVarCard({
   onEdit: (v: EnvVariable) => void;
   onDelete: (id: string) => void;
 }) {
+  const { toast } = useToast();
   const [revealed, setRevealed] = useState<string | null>(null);
   const [revealing, setRevealing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -89,7 +91,7 @@ function EnvVarCard({
       // Auto-hide after 30 seconds
       setTimeout(() => setRevealed(null), 30000);
     } catch {
-      alert('Failed to decrypt. This may happen if your vault was re-keyed.');
+      toast.error('Failed to decrypt. This may happen if your vault was re-keyed.');
     } finally {
       setRevealing(false);
     }
@@ -101,9 +103,10 @@ function EnvVarCard({
       const plaintext = revealed || await decrypt(vaultKey, variable.ciphertext, variable.iv);
       await navigator.clipboard.writeText(plaintext);
       setCopied(true);
+      toast.success('Copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      alert('Failed to copy. Please unlock vault first.');
+      toast.error('Failed to copy. Please unlock vault first.');
     }
   };
 
@@ -442,6 +445,7 @@ export default function EnvVariablesPage() {
   const params = useParams();
   const projectId = params.id as string;
   const { vaultKey, unlockVault } = useAuth();
+  const { toast } = useToast();
 
   const [variables, setVariables] = useState<EnvVariable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -471,6 +475,7 @@ export default function EnvVariablesPage() {
 
   const handleUnlock = async (password: string) => {
     await unlockVault(password);
+    toast.success('Vault unlocked successfully');
     if (pendingAction) { pendingAction(); setPendingAction(null); }
   };
 
@@ -490,9 +495,15 @@ export default function EnvVariablesPage() {
   }, {} as Record<string, EnvVariable[]>);
 
   const handleDelete = async (id: string) => {
-    await envVarsApi.delete(projectId, id);
-    setVariables((prev) => prev.filter((v) => v.id !== id));
-    setDeleteId(null);
+    try {
+      await envVarsApi.delete(projectId, id);
+      setVariables((prev) => prev.filter((v) => v.id !== id));
+      setDeleteId(null);
+      toast.success('Variable deleted');
+    } catch {
+      toast.error('Failed to delete variable');
+      setDeleteId(null);
+    }
   };
 
   return (

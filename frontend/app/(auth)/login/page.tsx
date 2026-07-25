@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
-
 import GoogleButton from '@/components/GoogleButton';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -22,16 +23,18 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { userId } = await authApi.login(email, password);
+      toast.success('Verification code sent to your email');
       router.push(`/verify-otp?userId=${userId}&email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
       const e = err as { code?: string; message: string };
+      let msg = 'Invalid email or password.';
       if (e.message.includes('ACCOUNT_LOCKED')) {
-        setError('Your account is temporarily locked due to too many failed attempts. Contact support.');
+        msg = 'Your account is temporarily locked due to too many failed attempts. Contact support.';
       } else if (e.code === 'USE_GOOGLE_LOGIN' || e.message.includes('Google')) {
-        setError('This account was created with Google OAuth. Please sign in with Google below.');
-      } else {
-        setError('Invalid email or password.');
+        msg = 'This account was created with Google OAuth. Please sign in with Google below.';
       }
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -59,10 +62,10 @@ export default function LoginPage() {
 
         <GoogleButton text="Sign in with Google" />
 
-        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', gap: 12 }}>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>or</span>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+        <div className="auth-divider">
+          <div className="auth-divider-line" />
+          <span className="auth-divider-text">or</span>
+          <div className="auth-divider-line" />
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -104,7 +107,7 @@ export default function LoginPage() {
               </button>
             </div>
             <div style={{ marginTop: 6, textAlign: 'right' }}>
-              <Link href="/forgot-password" className="text-primary" style={{ fontSize: 12 }}>
+              <Link href="/forgot-password" className="text-primary" style={{ fontSize: 12, fontWeight: 500 }}>
                 Forgot password?
               </Link>
             </div>
@@ -121,67 +124,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p style={{ marginTop: 20, textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)' }}>
+        <p className="auth-footer">
           Don&apos;t have an account?{' '}
           <Link href="/register" className="text-primary" style={{ fontWeight: 500 }}>
             Create one
           </Link>
         </p>
       </div>
-
-      <style jsx>{`
-        .auth-page {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg);
-          padding: 20px;
-        }
-        .auth-card {
-          width: 100%;
-          max-width: 400px;
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          padding: 36px;
-          box-shadow: var(--shadow-md);
-        }
-        .auth-logo {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 28px;
-        }
-        .logo-icon {
-          width: 34px;
-          height: 34px;
-          background: var(--text);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--primary);
-        }
-        .logo-text {
-          font-size: 16px;
-          font-weight: 700;
-          color: var(--text);
-          letter-spacing: -0.3px;
-        }
-        .auth-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: var(--text);
-          margin-bottom: 6px;
-          letter-spacing: -0.3px;
-        }
-        .auth-subtitle {
-          font-size: 13px;
-          color: var(--text-secondary);
-          margin-bottom: 24px;
-        }
-      `}</style>
     </div>
   );
 }

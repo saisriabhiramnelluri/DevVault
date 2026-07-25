@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { projectsApi } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { ArrowLeft, Plus, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ const TECH_SUGGESTIONS = [
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [stack, setStack] = useState<string[]>([]);
@@ -34,9 +36,12 @@ export default function NewProjectPage() {
     setError('');
     try {
       const { project } = await projectsApi.create({ name: name.trim(), description: description.trim(), stack });
+      toast.success('Project created successfully!');
       router.push(`/projects/${project.id}`);
     } catch {
-      setError('Failed to create project. Please try again.');
+      const msg = 'Failed to create project. Please try again.';
+      setError(msg);
+      toast.error(msg);
       setLoading(false);
     }
   };

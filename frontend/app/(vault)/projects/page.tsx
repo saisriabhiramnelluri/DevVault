@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { projectsApi, Project } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 import { FolderOpen, Plus, Search, ChevronRight, Key, Users, Terminal, MoreHorizontal, Trash2, Edit } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/dateUtils';
 
 export default function ProjectsPage() {
+  const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     projectsApi.list().then(({ projects }) => {
@@ -20,21 +23,39 @@ export default function ProjectsPage() {
     }).catch(() => setLoading(false));
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!openMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [openMenu]);
+
   const filtered = projects.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     (p.description || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const handleDelete = async (id: string) => {
-    await projectsApi.delete(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
-    setDeleteId(null);
+    try {
+      await projectsApi.delete(id);
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+      setDeleteId(null);
+      toast.success('Project deleted successfully');
+    } catch {
+      toast.error('Failed to delete project');
+      setDeleteId(null);
+    }
   };
 
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Projects</h1>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>
@@ -91,21 +112,21 @@ export default function ProjectsPage() {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{
-                    width: 40, height: 40, borderRadius: 10,
+                    width: 42, height: 42, borderRadius: 10,
                     background: 'var(--primary-bg)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
                     <FolderOpen size={18} style={{ color: 'var(--primary-text)' }} />
                   </div>
 
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <Link href={`/projects/${project.id}`} style={{ textDecoration: 'none' }}>
                       <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 3 }}>
                         {project.name}
                       </p>
                     </Link>
                     {project.description && (
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, lineHeight: 1.4 }}>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {project.description}
                       </p>
                     )}
@@ -126,11 +147,14 @@ export default function ProjectsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <Link href={`/projects/${project.id}`} className="btn btn-secondary btn-sm" style={{ display: 'none' }}>
+                      Open <ChevronRight size={12} />
+                    </Link>
                     <Link href={`/projects/${project.id}`} className="btn btn-secondary btn-sm">
                       Open <ChevronRight size={12} />
                     </Link>
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative' }} ref={openMenu === project.id ? menuRef : null}>
                       <button
                         className="btn-icon"
                         onClick={() => setOpenMenu(openMenu === project.id ? null : project.id)}
@@ -168,7 +192,7 @@ export default function ProjectsPage() {
 
                 {/* Stack tags */}
                 {project.stack.length > 0 && (
-                  <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap', paddingLeft: 54 }}>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap', paddingLeft: 56 }}>
                     {project.stack.map((tech) => (
                       <span key={tech} className="badge badge-gray" style={{ fontSize: 10 }}>{tech}</span>
                     ))}
@@ -185,7 +209,7 @@ export default function ProjectsPage() {
         <div className="modal-overlay" onClick={() => setDeleteId(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
             <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: 'var(--text)' }}>Delete Project?</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.5 }}>
               This will permanently delete the project and all its environment variables, accounts, and commands. This action cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
