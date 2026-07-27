@@ -280,11 +280,11 @@ export default function DiaryPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       {/* Header bar */}
-      <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div className="search-wrap" style={{ flex: '1 1 200px', maxWidth: 360 }}>
+      <div style={{ padding: '20px 48px', borderBottom: '1px solid var(--border)', background: 'var(--surface)', width: '100%' }}>
+        <div className="page-container" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="search-wrap" style={{ flex: '1 1 240px', maxWidth: 400 }}>
             <Search size={14} className="search-icon" />
             <input
               className="input"
@@ -302,56 +302,58 @@ export default function DiaryPage() {
 
       {/* Content */}
       <div className="page-content">
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-            <Loader2 size={20} style={{ animation: 'spin 0.6s linear infinite', color: 'var(--primary)' }} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <div style={{
-              width: 64, height: 64, borderRadius: 16,
-              background: 'var(--primary-bg)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 8,
-            }}>
-              <BookOpen size={28} style={{ color: 'var(--primary-text)' }} />
+        <div className="page-container">
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+              <Loader2 size={20} style={{ animation: 'spin 0.6s linear infinite', color: 'var(--primary)' }} />
             </div>
-            <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>
-              {search ? 'No entries match your search' : 'No diary entries yet'}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 360, lineHeight: 1.6 }}>
-              {search
-                ? 'Try a different search term'
-                : 'Keep track of important documentation, deployment steps, API notes, and things you don\'t want to forget.'
-              }
-            </p>
-            {!search && (
-              <button
-                className="btn btn-primary"
-                style={{ marginTop: 8 }}
-                onClick={() => setShowModal(true)}
-              >
-                <Plus size={14} /> Create First Entry
-              </button>
-            )}
-          </div>
-        ) : (
-          <div style={{ maxWidth: 800, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
-              {filtered.length} entr{filtered.length !== 1 ? 'ies' : 'y'}
-              {search && ` matching "${search}"`}
-            </p>
-            {filtered.map((entry) => (
-              <DiaryCard
-                key={entry.id}
-                entry={entry}
-                onEdit={(e) => { setEditing(e); setShowModal(true); }}
-                onDelete={(id) => setDeleteId(id)}
-                onTogglePin={handleTogglePin}
-              />
-            ))}
-          </div>
-        )}
+          ) : filtered.length === 0 ? (
+            <div className="empty-state">
+              <div style={{
+                width: 64, height: 64, borderRadius: 16,
+                background: 'var(--primary-bg)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 8,
+              }}>
+                <BookOpen size={28} style={{ color: 'var(--primary-text)' }} />
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>
+                {search ? 'No entries match your search' : 'No diary entries yet'}
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 400, lineHeight: 1.6 }}>
+                {search
+                  ? 'Try a different search term'
+                  : 'Keep track of important documentation, deployment steps, API notes, and things you don\'t want to forget.'
+                }
+              </p>
+              {!search && (
+                <button
+                  className="btn btn-primary"
+                  style={{ marginTop: 8 }}
+                  onClick={() => setShowModal(true)}
+                >
+                  <Plus size={14} /> Create First Entry
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
+                {filtered.length} entr{filtered.length !== 1 ? 'ies' : 'y'}
+                {search && ` matching "${search}"`}
+              </p>
+              {filtered.map((entry) => (
+                <DiaryCard
+                  key={entry.id}
+                  entry={entry}
+                  onEdit={(e) => { setEditing(e); setShowModal(true); }}
+                  onDelete={(id) => setDeleteId(id)}
+                  onTogglePin={handleTogglePin}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modals */}

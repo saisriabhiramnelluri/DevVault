@@ -159,10 +159,10 @@ export default function CommandsPage() {
   };
 
   return (
-    <div className="animate-fade-in">
-      <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <div className="search-wrap" style={{ flex: '1 1 200px', maxWidth: 320 }}>
+    <div className="animate-fade-in" style={{ width: '100%' }}>
+      <div style={{ padding: '20px 48px', borderBottom: '1px solid var(--border)', background: 'var(--surface)', width: '100%' }}>
+        <div className="page-container" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div className="search-wrap" style={{ flex: '1 1 240px', maxWidth: 360 }}>
             <Search size={14} className="search-icon" />
             <input className="input" placeholder="Search commands..." value={search}
               onChange={(e) => setSearch(e.target.value)} />
@@ -175,37 +175,39 @@ export default function CommandsPage() {
       </div>
 
       <div className="page-content">
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
-            <Loader2 size={20} style={{ animation: 'spin 0.6s linear infinite', color: 'var(--primary)' }} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <Terminal size={40} style={{ color: 'var(--text-muted)' }} />
-            <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-              {search ? 'No commands match your search' : 'No commands yet'}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              Save frequently used commands for this project
-            </p>
-            {!search && (
-              <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                <Plus size={14} /> Add Command
-              </button>
-            )}
-          </div>
-        ) : (
-          <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {filtered.map((cmd) => (
-              <CommandCard
-                key={cmd.id}
-                cmd={cmd}
-                onEdit={(c) => { setEditing(c); setShowModal(true); }}
-                onDelete={(id) => setDeleteId(id)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="page-container">
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+              <Loader2 size={20} style={{ animation: 'spin 0.6s linear infinite', color: 'var(--primary)' }} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="empty-state">
+              <Terminal size={40} style={{ color: 'var(--text-muted)' }} />
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
+                {search ? 'No commands match your search' : 'No commands yet'}
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Save frequently used commands for this project
+              </p>
+              {!search && (
+                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+                  <Plus size={14} /> Add Command
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%' }}>
+              {filtered.map((cmd) => (
+                <CommandCard
+                  key={cmd.id}
+                  cmd={cmd}
+                  onEdit={(c) => { setEditing(c); setShowModal(true); }}
+                  onDelete={(id) => setDeleteId(id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {showModal && (

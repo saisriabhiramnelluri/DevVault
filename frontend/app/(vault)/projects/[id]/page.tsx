@@ -25,41 +25,47 @@ export default function ProjectOverviewPage() {
   ];
 
   return (
-    <div className="page-content animate-fade-in">
-      <div style={{ maxWidth: 800 }}>
-        <div className="grid-3" style={{ marginBottom: 32, gridTemplateColumns: 'repeat(4, 1fr)' }}>
+    <div className="page-content animate-fade-in" style={{ width: '100%' }}>
+      <div className="page-container">
+        <div className="grid-2" style={{ marginBottom: 32, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
           {stats.map(({ label, value, icon: Icon, href, color }) => (
             <Link
               key={label}
               href={`/projects/${project.id}/${href}`}
               className="card card-interactive"
-              style={{ padding: 22, textDecoration: 'none' }}
+              style={{ padding: 24, textDecoration: 'none' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <Icon size={16} style={{ color }} />
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                <div style={{
+                  width: 34, height: 34, borderRadius: 8,
+                  background: `${color}18`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Icon size={16} style={{ color }} />
+                </div>
+                <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</span>
               </div>
-              <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)' }}>{value}</p>
+              <p style={{ fontSize: 32, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.5px' }}>{value}</p>
             </Link>
           ))}
         </div>
 
         {/* Dates */}
-        <div className="card" style={{ padding: 22 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>Project Info</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="card" style={{ padding: 24 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>Project Info</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Clock size={12} /> Created
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={14} /> Created
               </span>
-              <span style={{ fontSize: 12, color: 'var(--text)' }}>{formatDate(project.createdAt)}</span>
+              <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{formatDate(project.createdAt)}</span>
             </div>
             <div className="divider" style={{ margin: '2px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Clock size={12} /> Last updated
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={14} /> Last updated
               </span>
-              <span style={{ fontSize: 12, color: 'var(--text)' }}>{formatDate(project.updatedAt)}</span>
+              <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{formatDate(project.updatedAt)}</span>
             </div>
           </div>
         </div>

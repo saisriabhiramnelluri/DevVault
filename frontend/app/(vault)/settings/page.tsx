@@ -79,52 +79,53 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="animate-fade-in">
-      <div className="page-header">
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Settings</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>Manage sessions and security</p>
+    <div className="animate-fade-in" style={{ width: '100%' }}>
+      <div className="page-header" style={{ paddingBottom: 0 }}>
+        <div className="page-container">
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>Settings</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Manage sessions and security</p>
 
-        {/* Tabs — scrollable on mobile */}
-        <div style={{
-          display: 'flex',
-          gap: 2,
-          marginTop: 24,
-          borderBottom: '1px solid var(--border)',
-          marginLeft: -40,
-          marginRight: -40,
-          paddingLeft: 40,
-          paddingBottom: 0,
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}>
-          {[
-            { key: 'sessions', label: 'Active Sessions', icon: Monitor },
-            { key: 'audit', label: 'Audit Log', icon: FileText },
-          ].map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key as Tab)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '10px 16px', fontSize: 13, fontWeight: 500,
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: tab === key ? 'var(--primary-text)' : 'var(--text-secondary)',
-                borderBottom: tab === key ? '2px solid var(--primary)' : '2px solid transparent',
-                marginBottom: -1, fontFamily: 'inherit',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-              }}
-            >
-              <Icon size={14} /> {label}
-            </button>
-          ))}
+          {/* Tabs — scrollable on mobile */}
+          <div style={{
+            display: 'flex',
+            gap: 4,
+            marginTop: 24,
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: 0,
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}>
+            {[
+              { key: 'sessions', label: 'Active Sessions', icon: Monitor },
+              { key: 'audit', label: 'Audit Log', icon: FileText },
+            ].map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setTab(key as Tab)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '12px 18px', fontSize: 13, fontWeight: 600,
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: tab === key ? 'var(--primary-text)' : 'var(--text-secondary)',
+                  borderBottom: tab === key ? '2px solid var(--primary)' : '2px solid transparent',
+                  marginBottom: -1, fontFamily: 'inherit',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Icon size={15} /> {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="page-content">
-        <div style={{ maxWidth: 760 }}>
+        <div className="page-container">
+          <div>
           {/* Profile card */}
           <div className="card" style={{ padding: 24, marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -250,6 +251,7 @@ export default function SettingsPage() {
               )}
             </>
           )}
+        </div>
         </div>
       </div>
     </div>

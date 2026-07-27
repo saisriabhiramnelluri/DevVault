@@ -47,17 +47,20 @@ export default function NewProjectPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       <div className="page-header">
-        <Link href="/projects" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: 16 }}>
-          <ArrowLeft size={14} /> All Projects
-        </Link>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>New Project</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>Create a project to organize your secrets</p>
+        <div className="page-container">
+          <Link href="/projects" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: 16 }}>
+            <ArrowLeft size={14} /> All Projects
+          </Link>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>New Project</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Create a project to organize your secrets and documentation</p>
+        </div>
       </div>
 
       <div className="page-content">
-        <form onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
+        <div className="page-container">
+          <form onSubmit={handleSubmit} className="card" style={{ maxWidth: 640, padding: 32 }}>
           {error && <div className="alert alert-error">{error}</div>}
 
           <div className="form-group">
@@ -161,7 +164,8 @@ export default function NewProjectPage() {
               {loading ? 'Creating...' : 'Create Project'}
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

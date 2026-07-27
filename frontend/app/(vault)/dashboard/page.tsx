@@ -54,103 +54,107 @@ export default function DashboardPage() {
   const firstName = user?.email.split('@')[0] || 'there';
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       {/* Header */}
       <div className="page-header">
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>
-          {greeting}, {firstName} 👋
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
-          What would you like to manage today?
-        </p>
+        <div className="page-container">
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>
+            {greeting}, {firstName} 👋
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
+            What would you like to manage today?
+          </p>
+        </div>
       </div>
 
       <div className="page-content">
-        {/* Action cards */}
-        <div className="grid-2" style={{ marginBottom: 44, maxWidth: 860 }}>
-          {ACTION_CARDS.map(({ title, description, icon: Icon, href, color }) => (
-            <Link
-              key={title}
-              href={href}
-              className="card card-interactive"
-              style={{ padding: 24, textDecoration: 'none', display: 'block' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                <div style={{
-                  width: 42, height: 42,
-                  borderRadius: 10,
-                  background: `${color}18`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <Icon size={18} style={{ color }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
-                    {title}
-                  </p>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                    {description}
-                  </p>
-                </div>
-                <ChevronRight size={15} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 3 }} />
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Recent projects */}
-        <div style={{ maxWidth: 860 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Recent Projects</h2>
-            <Link href="/projects" style={{ fontSize: 12, color: 'var(--primary-text)', textDecoration: 'none', fontWeight: 500 }}>
-              View all →
-            </Link>
-          </div>
-
-          {loading ? (
-            <div style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="card" style={{ padding: 16, height: 72, background: 'var(--surface-hover)', opacity: 0.6 }} />
-              ))}
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="card" style={{ padding: 32, textAlign: 'center' }}>
-              <FolderOpen size={32} style={{ color: 'var(--text-muted)', margin: '0 auto 12px' }} />
-              <p style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500, marginBottom: 6 }}>No projects yet</p>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>Create your first project to get started</p>
-              <Link href="/projects/new" className="btn btn-primary">
-                <Plus size={14} /> Create Project
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {projects.map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  className="card card-interactive"
-                  style={{ padding: '14px 18px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14 }}
-                >
+        <div className="page-container">
+          {/* Action cards */}
+          <div className="grid-2" style={{ marginBottom: 44, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+            {ACTION_CARDS.map(({ title, description, icon: Icon, href, color }) => (
+              <Link
+                key={title}
+                href={href}
+                className="card card-interactive"
+                style={{ padding: 24, textDecoration: 'none', display: 'block' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                   <div style={{
-                    width: 38, height: 38, borderRadius: 10,
-                    background: 'var(--primary-bg)',
+                    width: 44, height: 44,
+                    borderRadius: 12,
+                    background: `${color}18`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0,
                   }}>
-                    <FolderOpen size={16} style={{ color: 'var(--primary-text)' }} />
+                    <Icon size={20} style={{ color }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{project.name}</p>
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                      {project._count?.envVars || 0} vars · {project._count?.accounts || 0} accounts · {project._count?.commands || 0} commands
+                    <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                      {title}
+                    </p>
+                    <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                      {description}
                     </p>
                   </div>
-                  <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                </Link>
-              ))}
+                  <ChevronRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 3 }} />
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Recent projects */}
+          <div style={{ width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>Recent Projects</h2>
+              <Link href="/projects" style={{ fontSize: 13, color: 'var(--primary-text)', textDecoration: 'none', fontWeight: 500 }}>
+                View all →
+              </Link>
             </div>
-          )}
+
+            {loading ? (
+              <div style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="card" style={{ padding: 16, height: 72, background: 'var(--surface-hover)', opacity: 0.6 }} />
+                ))}
+              </div>
+            ) : projects.length === 0 ? (
+              <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+                <FolderOpen size={36} style={{ color: 'var(--text-muted)', margin: '0 auto 14px' }} />
+                <p style={{ fontSize: 15, color: 'var(--text)', fontWeight: 600, marginBottom: 6 }}>No projects yet</p>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>Create your first project to get started</p>
+                <Link href="/projects/new" className="btn btn-primary">
+                  <Plus size={14} /> Create Project
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {projects.map((project) => (
+                  <Link
+                    key={project.id}
+                    href={`/projects/${project.id}`}
+                    className="card card-interactive"
+                    style={{ padding: '18px 22px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16 }}
+                  >
+                    <div style={{
+                      width: 42, height: 42, borderRadius: 12,
+                      background: 'var(--primary-bg)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <FolderOpen size={18} style={{ color: 'var(--primary-text)' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{project.name}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>
+                        {project._count?.envVars || 0} vars · {project._count?.accounts || 0} accounts · {project._count?.commands || 0} commands · {project._count?.diaryEntries || 0} diary entries
+                      </p>
+                    </div>
+                    <ChevronRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

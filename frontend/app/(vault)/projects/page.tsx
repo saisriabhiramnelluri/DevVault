@@ -53,63 +53,66 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Projects</h1>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>
-              {projects.length} project{projects.length !== 1 ? 's' : ''} in your vault
-            </p>
+        <div className="page-container">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>Projects</h1>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+                {projects.length} project{projects.length !== 1 ? 's' : ''} in your vault
+              </p>
+            </div>
+            <Link href="/projects/new" className="btn btn-primary">
+              <Plus size={14} /> New Project
+            </Link>
           </div>
-          <Link href="/projects/new" className="btn btn-primary">
-            <Plus size={14} /> New Project
-          </Link>
-        </div>
 
-        {/* Search */}
-        <div className="search-wrap" style={{ marginTop: 20, maxWidth: 360 }}>
-          <Search size={14} className="search-icon" />
-          <input
-            type="text"
-            className="input"
-            placeholder="Search projects..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          {/* Search */}
+          <div className="search-wrap" style={{ marginTop: 20, maxWidth: 400 }}>
+            <Search size={14} className="search-icon" />
+            <input
+              type="text"
+              className="input"
+              placeholder="Search projects..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
       <div className="page-content">
-        {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card" style={{ padding: 20, height: 80, background: 'var(--surface-hover)', opacity: 0.6 }} />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <FolderOpen size={40} style={{ color: 'var(--text-muted)' }} />
-            <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-              {search ? 'No projects match your search' : 'No projects yet'}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              {search ? 'Try a different search term' : 'Create your first project to start managing secrets'}
-            </p>
-            {!search && (
-              <Link href="/projects/new" className="btn btn-primary">
-                <Plus size={14} /> Create Project
-              </Link>
-            )}
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 860 }}>
-            {filtered.map((project) => (
-              <div
-                key={project.id}
-                className="card"
-                style={{ padding: '20px 24px', position: 'relative' }}
-              >
+        <div className="page-container">
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card" style={{ padding: 24, height: 96, background: 'var(--surface-hover)', opacity: 0.6 }} />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="empty-state">
+              <FolderOpen size={44} style={{ color: 'var(--text-muted)' }} />
+              <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
+                {search ? 'No projects match your search' : 'No projects yet'}
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                {search ? 'Try a different search term' : 'Create your first project to start managing secrets and documentation'}
+              </p>
+              {!search && (
+                <Link href="/projects/new" className="btn btn-primary">
+                  <Plus size={14} /> Create Project
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%' }}>
+              {filtered.map((project) => (
+                <div
+                  key={project.id}
+                  className="card"
+                  style={{ padding: '20px 24px', position: 'relative' }}
+                >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{
                     width: 42, height: 42, borderRadius: 10,
@@ -202,6 +205,7 @@ export default function ProjectsPage() {
             ))}
           </div>
         )}
+        </div>
       </div>
 
       {/* Delete confirmation modal */}

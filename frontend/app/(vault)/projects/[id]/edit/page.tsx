@@ -56,16 +56,19 @@ export default function EditProjectPage() {
   if (fetchLoading) return null;
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       <div className="page-header">
-        <Link href={`/projects/${params.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: 16 }}>
-          <ArrowLeft size={14} /> {project?.name}
-        </Link>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Edit Project</h1>
+        <div className="page-container">
+          <Link href={`/projects/${params.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: 16 }}>
+            <ArrowLeft size={14} /> {project?.name}
+          </Link>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>Edit Project</h1>
+        </div>
       </div>
 
       <div className="page-content">
-        <form onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
+        <div className="page-container">
+          <form onSubmit={handleSubmit} className="card" style={{ maxWidth: 640, padding: 32 }}>
           {error && <div className="alert alert-error">{error}</div>}
           <div className="form-group">
             <label className="label">Project Name *</label>
@@ -110,7 +113,8 @@ export default function EditProjectPage() {
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

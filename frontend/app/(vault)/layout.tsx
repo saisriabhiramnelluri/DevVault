@@ -34,7 +34,7 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
   if (!user) return null;
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
       {/* Mobile hamburger */}
       <button
         className="mobile-menu-btn"

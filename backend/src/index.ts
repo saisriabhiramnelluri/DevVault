@@ -48,6 +48,11 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ── Health check (Exempt from rate limiting & auth for deployment health probes) ──────
+app.get(['/health', '/'], (_req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
 // ── General rate limiting ──────────────────────────────────────────────────────
 app.use(
   rateLimit({
@@ -55,14 +60,10 @@ app.use(
     max: config.rateLimit.general.max,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.path === '/health' || req.path === '/',
     message: { error: 'RATE_LIMITED', message: 'Too many requests. Please slow down.' },
   })
 );
-
-// ── Health check ───────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);

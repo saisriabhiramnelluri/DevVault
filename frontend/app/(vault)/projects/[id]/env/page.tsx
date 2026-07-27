@@ -507,10 +507,10 @@ export default function EnvVariablesPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       {/* Header bar */}
-      <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ padding: '20px 48px', borderBottom: '1px solid var(--border)', background: 'var(--surface)', width: '100%' }}>
+        <div className="page-container" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Search */}
           <div className="search-wrap" style={{ flex: '1 1 200px', maxWidth: 320 }}>
             <Search size={14} className="search-icon" />
@@ -571,61 +571,63 @@ export default function EnvVariablesPage() {
 
       {/* Content */}
       <div className="page-content">
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
-            <Loader2 size={20} style={{ animation: 'spin 0.6s linear infinite', color: 'var(--primary)' }} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <Key size={40} style={{ color: 'var(--text-muted)' }} />
-            <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-              {search || filterCategory !== 'ALL' ? 'No variables match your filters' : 'No variables yet'}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              {!search && filterCategory === 'ALL' ? 'Add your first environment variable or import a .env file' : 'Try different search terms or filters'}
-            </p>
-            {!search && filterCategory === 'ALL' && (
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}>
-                  <Upload size={14} /> Import .env
-                </button>
-                <button className="btn btn-primary" onClick={() => {
-                  if (!vaultKey) { requestUnlock(() => setShowAddModal(true)); return; }
-                  setShowAddModal(true);
-                }}>
-                  <Plus size={14} /> Add Variable
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div style={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 28 }}>
-            {Object.entries(grouped).map(([category, vars]) => (
-              <div key={category}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <span className={`badge badge-${category}`}>{category}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{vars.length} variable{vars.length !== 1 ? 's' : ''}</span>
+        <div className="page-container">
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+              <Loader2 size={20} style={{ animation: 'spin 0.6s linear infinite', color: 'var(--primary)' }} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="empty-state">
+              <Key size={40} style={{ color: 'var(--text-muted)' }} />
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
+                {search || filterCategory !== 'ALL' ? 'No variables match your filters' : 'No variables yet'}
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                {!search && filterCategory === 'ALL' ? 'Add your first environment variable or import a .env file' : 'Try different search terms or filters'}
+              </p>
+              {!search && filterCategory === 'ALL' && (
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}>
+                    <Upload size={14} /> Import .env
+                  </button>
+                  <button className="btn btn-primary" onClick={() => {
+                    if (!vaultKey) { requestUnlock(() => setShowAddModal(true)); return; }
+                    setShowAddModal(true);
+                  }}>
+                    <Plus size={14} /> Add Variable
+                  </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {vars.map((v) => (
-                    <EnvVarCard
-                      key={v.id}
-                      variable={v}
-                      vaultKey={vaultKey}
-                      onRevealRequest={() => requestUnlock()}
-                      onEdit={(v) => {
-                        setEditingVar(v);
-                        if (!vaultKey) requestUnlock();
-                        else setShowAddModal(true);
-                      }}
-                      onDelete={(id) => setDeleteId(id)}
-                    />
-                  ))}
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 28, width: '100%' }}>
+              {Object.entries(grouped).map(([category, vars]) => (
+                <div key={category}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <span className={`badge badge-${category}`}>{category}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{vars.length} variable{vars.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {vars.map((v) => (
+                      <EnvVarCard
+                        key={v.id}
+                        variable={v}
+                        vaultKey={vaultKey}
+                        onRevealRequest={() => requestUnlock()}
+                        onEdit={(v) => {
+                          setEditingVar(v);
+                          if (!vaultKey) requestUnlock();
+                          else setShowAddModal(true);
+                        }}
+                        onDelete={(id) => setDeleteId(id)}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modals */}

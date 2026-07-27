@@ -30,78 +30,77 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
   };
 
   return (
-    <div>
+    <div style={{ width: '100%' }}>
       {/* Project header */}
-      <div className="page-header">
-        <Link
-          href="/projects"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none', marginBottom: 16 }}
-        >
-          <ArrowLeft size={12} /> Projects
-        </Link>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <div style={{ minWidth: 0 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>
-              {project?.name || '...'}
-            </h1>
-            {project?.description && (
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>{project.description}</p>
-            )}
-          </div>
-          <Link href={`/projects/${projectId}/edit`} className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
-            <Edit size={13} /> Edit
+      <div className="page-header" style={{ paddingBottom: 0 }}>
+        <div className="page-container">
+          <Link
+            href="/projects"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none', marginBottom: 16 }}
+          >
+            <ArrowLeft size={12} /> Projects
           </Link>
-        </div>
 
-        {/* Stack tags */}
-        {project?.stack && project.stack.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
-            {project.stack.map((tech) => (
-              <span key={tech} className="badge badge-gray" style={{ fontSize: 11 }}>{tech}</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ minWidth: 0 }}>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>
+                {project?.name || '...'}
+              </h1>
+              {project?.description && (
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>{project.description}</p>
+              )}
+            </div>
+            <Link href={`/projects/${projectId}/edit`} className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
+              <Edit size={13} /> Edit
+            </Link>
+          </div>
+
+          {/* Stack tags */}
+          {project?.stack && project.stack.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+              {project.stack.map((tech) => (
+                <span key={tech} className="badge badge-gray" style={{ fontSize: 11 }}>{tech}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Tabs — scrollable on mobile */}
+          <div style={{
+            display: 'flex',
+            gap: 4,
+            marginTop: 24,
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: 0,
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}>
+            {tabs.map(({ label, href, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '12px 18px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  color: isActive(href) ? 'var(--primary-text)' : 'var(--text-secondary)',
+                  borderBottom: isActive(href) ? '2px solid var(--primary)' : '2px solid transparent',
+                  marginBottom: -1,
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                <Icon size={15} />
+                {label}
+              </Link>
             ))}
           </div>
-        )}
-
-        {/* Tabs — scrollable on mobile */}
-        <div style={{
-          display: 'flex',
-          gap: 2,
-          marginTop: 24,
-          borderBottom: '1px solid var(--border)',
-          marginLeft: -40,
-          marginRight: -40,
-          paddingLeft: 40,
-          paddingBottom: 0,
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}>
-          {tabs.map(({ label, href, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '10px 16px',
-                fontSize: 13,
-                fontWeight: 500,
-                textDecoration: 'none',
-                color: isActive(href) ? 'var(--primary-text)' : 'var(--text-secondary)',
-                borderBottom: isActive(href) ? '2px solid var(--primary)' : '2px solid transparent',
-                marginBottom: -1,
-                transition: 'color 0.15s',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-              }}
-            >
-              <Icon size={14} />
-              {label}
-            </Link>
-          ))}
         </div>
       </div>
 

@@ -35,16 +35,19 @@ export default function GlobalAccountsPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%' }}>
       <div className="page-header">
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Account Search</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>
-          Find every service tied to a specific email account
-        </p>
+        <div className="page-container">
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.4px' }}>Account Search</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+            Find every service tied to a specific email account
+          </p>
+        </div>
       </div>
 
       <div className="page-content">
-        <div style={{ maxWidth: 540 }}>
+        <div className="page-container">
+          <div style={{ maxWidth: 680 }}>
           {/* Search box */}
           <div className="card" style={{ padding: 28, marginBottom: 28 }}>
             <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
@@ -138,6 +141,7 @@ export default function GlobalAccountsPage() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

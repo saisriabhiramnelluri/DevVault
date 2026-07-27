@@ -21,9 +21,9 @@ export const config = {
     expiresHours: 1,
   },
   rateLimit: {
-    login: { windowMs: 15 * 60 * 1000, max: 5 },
-    otp: { windowMs: 15 * 60 * 1000, max: 3 },
-    general: { windowMs: 15 * 60 * 1000, max: 100 },
+    login: { windowMs: 15 * 60 * 1000, max: parseInt(process.env.RATE_LIMIT_LOGIN_MAX || '10', 10) },
+    otp: { windowMs: 15 * 60 * 1000, max: parseInt(process.env.RATE_LIMIT_OTP_MAX || '5', 10) },
+    general: { windowMs: 15 * 60 * 1000, max: parseInt(process.env.RATE_LIMIT_GENERAL_MAX || '500', 10) },
   },
   accountLock: {
     maxAttempts: 20,
