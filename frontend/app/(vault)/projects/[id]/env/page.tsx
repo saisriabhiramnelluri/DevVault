@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
 import { encrypt, decrypt } from '@/lib/crypto';
 import {
-  Plus, Search, Eye, EyeOff, Copy, Edit, Trash2, Upload, X,
+  Plus, Search, Eye, EyeOff, Copy, Edit, Trash2, Upload, Download, X,
   Check, Loader2, Key,
 } from 'lucide-react';
 
@@ -458,6 +458,7 @@ export default function EnvVariablesPage() {
   const [editingVar, setEditingVar] = useState<EnvVariable | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const fetchVars = useCallback(() => {
     envVarsApi.list(projectId).then(({ variables }) => {
@@ -503,6 +504,54 @@ export default function EnvVariablesPage() {
     } catch {
       toast.error('Failed to delete variable');
       setDeleteId(null);
+    }
+  };
+
+  const handleDownloadEnv = async () => {
+    if (!vaultKey) {
+      requestUnlock(() => handleDownloadEnv());
+      return;
+    }
+
+    const varsToExport = filtered.length > 0 ? filtered : variables;
+    if (varsToExport.length === 0) {
+      toast.error('No environment variables to download.');
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const lines = await Promise.all(
+        varsToExport.map(async (v) => {
+          try {
+            const val = await decrypt(vaultKey, v.ciphertext, v.iv);
+            const needsQuotes = /[\s"#\\]/.test(val) || val === '';
+            const escapedVal = val.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+            return `${v.key}=${needsQuotes ? `"${escapedVal}"` : val}`;
+          } catch {
+            return `# ${v.key}=<decryption_failed>`;
+          }
+        })
+      );
+
+      const envHeader = `# DevVault Export - ${filterEnv !== 'ALL' ? filterEnv : 'ALL'} Environment Variables\n# Exported at ${new Date().toISOString()}\n\n`;
+      const fileContent = envHeader + lines.join('\n') + '\n';
+
+      const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filterEnv !== 'ALL' ? `${filterEnv.toLowerCase()}.env` : '.env';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Downloaded ${varsToExport.length} variable${varsToExport.length !== 1 ? 's' : ''} as .env`);
+    } catch {
+      toast.error('Failed to export .env file.');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -557,6 +606,15 @@ export default function EnvVariablesPage() {
           <div style={{ flex: 1 }} />
 
           {/* Actions */}
+          <button
+            className="btn btn-secondary"
+            onClick={handleDownloadEnv}
+            disabled={exporting || variables.length === 0}
+            title="Download variables formatted as a .env file"
+          >
+            {exporting ? <Loader2 size={14} style={{ animation: 'spin 0.6s linear infinite' }} /> : <Download size={14} />}
+            {exporting ? 'Exporting...' : 'Download .env'}
+          </button>
           <button className="btn btn-secondary" onClick={() => setShowImportModal(true)}>
             <Upload size={14} /> Import .env
           </button>
