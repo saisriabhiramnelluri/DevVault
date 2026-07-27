@@ -27,6 +27,9 @@ const ACTION_LABELS: Record<string, string> = {
   COMMAND_CREATED: '⌨️ Command created',
   COMMAND_UPDATED: '✏️ Command updated',
   COMMAND_DELETED: '🗑️ Command deleted',
+  DIARY_ENTRY_CREATED: '📝 Diary entry created',
+  DIARY_ENTRY_UPDATED: '✏️ Diary entry updated',
+  DIARY_ENTRY_DELETED: '🗑️ Diary entry deleted',
 };
 
 type Tab = 'sessions' | 'audit';
@@ -85,11 +88,11 @@ export default function SettingsPage() {
         <div style={{
           display: 'flex',
           gap: 2,
-          marginTop: 20,
+          marginTop: 24,
           borderBottom: '1px solid var(--border)',
-          marginLeft: -32,
-          marginRight: -32,
-          paddingLeft: 32,
+          marginLeft: -40,
+          marginRight: -40,
+          paddingLeft: 40,
           paddingBottom: 0,
           overflowX: 'auto',
           WebkitOverflowScrolling: 'touch',
@@ -105,7 +108,7 @@ export default function SettingsPage() {
               onClick={() => setTab(key as Tab)}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '8px 14px', fontSize: 13, fontWeight: 500,
+                padding: '10px 16px', fontSize: 13, fontWeight: 500,
                 background: 'none', border: 'none', cursor: 'pointer',
                 color: tab === key ? 'var(--primary-text)' : 'var(--text-secondary)',
                 borderBottom: tab === key ? '2px solid var(--primary)' : '2px solid transparent',
@@ -121,9 +124,9 @@ export default function SettingsPage() {
       </div>
 
       <div className="page-content">
-        <div style={{ maxWidth: 640 }}>
+        <div style={{ maxWidth: 760 }}>
           {/* Profile card */}
-          <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+          <div className="card" style={{ padding: 24, marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{
                 width: 46, height: 46, borderRadius: 12,
@@ -147,7 +150,7 @@ export default function SettingsPage() {
           {/* Sessions tab */}
           {tab === 'sessions' && (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
                   Active Sessions <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({sessions.length})</span>
                 </p>
@@ -167,7 +170,7 @@ export default function SettingsPage() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {sessions.map((session) => (
-                    <div key={session.id} className="card" style={{ padding: '14px 18px' }}>
+                    <div key={session.id} className="card" style={{ padding: '16px 20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                         <Monitor size={18} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -196,7 +199,7 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              <div style={{ marginTop: 20 }}>
+              <div style={{ marginTop: 24 }}>
                 <button
                   className="btn btn-danger"
                   onClick={() => {

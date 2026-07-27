@@ -111,7 +111,7 @@ function EnvVarCard({
   };
 
   return (
-    <div className="card" style={{ padding: '14px 18px' }}>
+    <div className="card" style={{ padding: '16px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
@@ -509,7 +509,7 @@ export default function EnvVariablesPage() {
   return (
     <div className="animate-fade-in">
       {/* Header bar */}
-      <div style={{ padding: '16px 32px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Search */}
           <div className="search-wrap" style={{ flex: '1 1 200px', maxWidth: 320 }}>
@@ -599,7 +599,7 @@ export default function EnvVariablesPage() {
             )}
           </div>
         ) : (
-          <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 28 }}>
             {Object.entries(grouped).map(([category, vars]) => (
               <div key={category}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>

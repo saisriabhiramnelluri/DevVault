@@ -269,6 +269,32 @@ export const commandsApi = {
     }),
 };
 
+// ── Diary Entries ──────────────────────────────────────────────────────────────
+
+export const diaryApi = {
+  list: (projectId: string, search?: string) =>
+    request<{ entries: DiaryEntry[] }>(
+      `/api/projects/${projectId}/diary${search ? `?search=${encodeURIComponent(search)}` : ''}`
+    ),
+
+  create: (projectId: string, data: CreateDiaryEntryDto) =>
+    request<{ entry: DiaryEntry }>(`/api/projects/${projectId}/diary`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (projectId: string, entryId: string, data: Partial<CreateDiaryEntryDto>) =>
+    request<{ entry: DiaryEntry }>(`/api/projects/${projectId}/diary/${entryId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (projectId: string, entryId: string) =>
+    request<{ message: string }>(`/api/projects/${projectId}/diary/${entryId}`, {
+      method: 'DELETE',
+    }),
+};
+
 // ── Audit Logs ─────────────────────────────────────────────────────────────────
 
 export const auditApi = {
@@ -285,7 +311,7 @@ export interface Project {
   stack: string[];
   createdAt: string;
   updatedAt: string;
-  _count?: { envVars: number; accounts: number; commands: number };
+  _count?: { envVars: number; accounts: number; commands: number; diaryEntries: number };
 }
 
 export interface EnvVariable {
@@ -357,6 +383,22 @@ export interface CreateCommandDto {
   command: string;
   description?: string;
   order?: number;
+}
+
+export interface DiaryEntry {
+  id: string;
+  projectId: string;
+  title: string;
+  content: string;
+  pinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDiaryEntryDto {
+  title: string;
+  content: string;
+  pinned?: boolean;
 }
 
 export interface Session {

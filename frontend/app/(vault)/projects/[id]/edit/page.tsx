@@ -58,7 +58,7 @@ export default function EditProjectPage() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <Link href={`/projects/${params.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: 12 }}>
+        <Link href={`/projects/${params.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: 16 }}>
           <ArrowLeft size={14} /> {project?.name}
         </Link>
         <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Edit Project</h1>
@@ -103,7 +103,7 @@ export default function EditProjectPage() {
               ))}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
             <Link href={`/projects/${params.id}`} className="btn btn-secondary">Cancel</Link>
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading && <Loader2 size={14} style={{ animation: 'spin 0.6s linear infinite' }} />}

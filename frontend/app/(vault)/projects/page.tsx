@@ -58,7 +58,7 @@ export default function ProjectsPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Projects</h1>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>
               {projects.length} project{projects.length !== 1 ? 's' : ''} in your vault
             </p>
           </div>
@@ -68,7 +68,7 @@ export default function ProjectsPage() {
         </div>
 
         {/* Search */}
-        <div className="search-wrap" style={{ marginTop: 16, maxWidth: 360 }}>
+        <div className="search-wrap" style={{ marginTop: 20, maxWidth: 360 }}>
           <Search size={14} className="search-icon" />
           <input
             type="text"
@@ -103,12 +103,12 @@ export default function ProjectsPage() {
             )}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 720 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 860 }}>
             {filtered.map((project) => (
               <div
                 key={project.id}
                 className="card"
-                style={{ padding: '16px 20px', position: 'relative' }}
+                style={{ padding: '20px 24px', position: 'relative' }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{

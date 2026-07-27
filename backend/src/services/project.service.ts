@@ -17,7 +17,7 @@ export async function getProjects(userId: string) {
     orderBy: { updatedAt: 'desc' },
     include: {
       _count: {
-        select: { envVars: true, accounts: true, commands: true },
+        select: { envVars: true, accounts: true, commands: true, diaryEntries: true },
       },
     },
   });
@@ -28,7 +28,7 @@ export async function getProject(id: string, userId: string) {
     where: { id, userId },
     include: {
       _count: {
-        select: { envVars: true, accounts: true, commands: true },
+        select: { envVars: true, accounts: true, commands: true, diaryEntries: true },
       },
     },
   });

@@ -145,7 +145,7 @@ function AccountCard({
   };
 
   return (
-    <div className="card" style={{ padding: '16px 18px' }}>
+    <div className="card" style={{ padding: '20px 22px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{
           width: 40, height: 40, borderRadius: 10,
@@ -277,7 +277,7 @@ export default function AccountsPage() {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ padding: '16px 32px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+      <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div className="search-wrap" style={{ flex: '1 1 200px', maxWidth: 320 }}>
             <Search size={14} className="search-icon" />
@@ -312,7 +312,7 @@ export default function AccountsPage() {
             )}
           </div>
         ) : (
-          <div style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map((account) => (
               <AccountCard
                 key={account.id}

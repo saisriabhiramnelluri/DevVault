@@ -38,7 +38,7 @@ export default function GlobalAccountsPage() {
     <div className="animate-fade-in">
       <div className="page-header">
         <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>Account Search</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 5 }}>
           Find every service tied to a specific email account
         </p>
       </div>
@@ -46,7 +46,7 @@ export default function GlobalAccountsPage() {
       <div className="page-content">
         <div style={{ maxWidth: 540 }}>
           {/* Search box */}
-          <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <div className="card" style={{ padding: 28, marginBottom: 28 }}>
             <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
               Search by Email
             </p>
@@ -88,7 +88,7 @@ export default function GlobalAccountsPage() {
                   <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
                     Found <strong>{results.length}</strong> service{results.length !== 1 ? 's' : ''} linked to <strong>{email}</strong>
                   </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {results.map((account) => (
                       <Link
                         key={account.id}
@@ -122,7 +122,7 @@ export default function GlobalAccountsPage() {
 
           {/* Explanation */}
           {!searched && (
-            <div className="card" style={{ padding: 20 }}>
+            <div className="card" style={{ padding: 24 }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>Why use this?</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[

@@ -3,6 +3,7 @@ import * as projectController from '../controllers/project.controller';
 import * as envVarController from '../controllers/envvar.controller';
 import * as accountController from '../controllers/account.controller';
 import * as commandController from '../controllers/command.controller';
+import * as diaryController from '../controllers/diary.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import {
@@ -11,6 +12,7 @@ import {
   bulkEnvVarSchema,
   createAccountSchema,
   createCommandSchema,
+  createDiaryEntrySchema,
 } from '../validators/schemas';
 
 const router = Router();
@@ -42,5 +44,11 @@ router.get('/:projectId/commands', commandController.getCommands);
 router.post('/:projectId/commands', validate(createCommandSchema), commandController.createCommand);
 router.put('/:projectId/commands/:cmdId', commandController.updateCommand);
 router.delete('/:projectId/commands/:cmdId', commandController.deleteCommand);
+
+// ── Diary Entries ──────────────────────────────────────────────────────────────
+router.get('/:projectId/diary', diaryController.getDiaryEntries);
+router.post('/:projectId/diary', validate(createDiaryEntrySchema), diaryController.createDiaryEntry);
+router.put('/:projectId/diary/:entryId', diaryController.updateDiaryEntry);
+router.delete('/:projectId/diary/:entryId', diaryController.deleteDiaryEntry);
 
 export default router;

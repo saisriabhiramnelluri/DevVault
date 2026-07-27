@@ -93,3 +93,9 @@ export const createCommandSchema = z.object({
   description: z.string().max(500).optional(),
   order: z.number().int().min(0).optional(),
 });
+
+export const createDiaryEntrySchema = z.object({
+  title: z.string().min(1).max(200),
+  content: z.string().min(1).max(10000),
+  pinned: z.boolean().optional(),
+});

@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       <nav className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         {/* Logo */}
-        <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ padding: '24px 16px 20px', borderBottom: '1px solid var(--border)' }}>
           <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <div style={{
               width: 34, height: 34,
@@ -74,7 +74,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         {/* Nav */}
-        <div style={{ padding: '14px 12px', flex: 1 }}>
+        <div style={{ padding: '18px 12px', flex: 1 }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0 6px', marginBottom: 10 }}>
             Workspace
           </p>
@@ -92,7 +92,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '12px 12px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ padding: '14px 12px', borderTop: '1px solid var(--border)' }}>
           {/* User info */}
           <div style={{
             padding: '10px 12px',

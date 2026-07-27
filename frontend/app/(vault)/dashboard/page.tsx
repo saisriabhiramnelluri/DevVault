@@ -60,20 +60,20 @@ export default function DashboardPage() {
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>
           {greeting}, {firstName} 👋
         </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 4 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 6 }}>
           What would you like to manage today?
         </p>
       </div>
 
       <div className="page-content">
         {/* Action cards */}
-        <div className="grid-2" style={{ marginBottom: 32, maxWidth: 720 }}>
+        <div className="grid-2" style={{ marginBottom: 44, maxWidth: 860 }}>
           {ACTION_CARDS.map(({ title, description, icon: Icon, href, color }) => (
             <Link
               key={title}
               href={href}
               className="card card-interactive"
-              style={{ padding: 20, textDecoration: 'none', display: 'block' }}
+              style={{ padding: 24, textDecoration: 'none', display: 'block' }}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                 <div style={{
@@ -100,8 +100,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent projects */}
-        <div style={{ maxWidth: 720 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ maxWidth: 860 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Recent Projects</h2>
             <Link href="/projects" style={{ fontSize: 12, color: 'var(--primary-text)', textDecoration: 'none', fontWeight: 500 }}>
               View all →
@@ -124,7 +124,7 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {projects.map((project) => (
                 <Link
                   key={project.id}
